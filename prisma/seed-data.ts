@@ -63,6 +63,15 @@ export const destinationSeed: DestinationSeed[] = [
   { ...common, regionSlug: "azad-jammu-kashmir", name: "Banjosa Lake", slug: "banjosa-lake", latitude: 33.7667, longitude: 73.75, elevationMeters: 1981, difficulty: "easy", description: "A small forest-ringed lake near Rawalakot." },
   { ...common, regionSlug: "azad-jammu-kashmir", name: "Pir Chinasi", slug: "pir-chinasi", latitude: 34.42, longitude: 73.4667, elevationMeters: 2900, description: "A high ridge viewpoint above Muzaffarabad." },
   { ...common, regionSlug: "azad-jammu-kashmir", name: "Muzaffarabad", slug: "muzaffarabad", latitude: 34.37, longitude: 73.4711, elevationMeters: 702, difficulty: "easy", description: "AJK's capital at the meeting of the Neelum and Jhelum rivers." },
+  // Southern gateway cities — verified coordinates for extended network phase
+  { ...common, regionSlug: "kpk-northern-areas", name: "Peshawar", slug: "peshawar", latitude: 34.0151, longitude: 71.5249, elevationMeters: 331, difficulty: "easy", description: "Historic frontier city and gateway to Khyber Pakhtunkhwa's mountain valleys." },
+  { ...common, regionSlug: "kpk-northern-areas", name: "Abbottabad", slug: "abbottabad", latitude: 34.1463, longitude: 73.2117, elevationMeters: 1256, difficulty: "easy", description: "A green hill city below the Galiyat and gateway routes toward Kashmir." },
+  { ...common, regionSlug: "kpk-northern-areas", name: "Murree", slug: "murree", latitude: 33.907, longitude: 73.3903, elevationMeters: 2291, difficulty: "easy", description: "A classic hill station above the Punjab plain with forested ridges." },
+  { ...common, regionSlug: "kpk-northern-areas", name: "Nathiagali", slug: "nathiagali", latitude: 34.0737, longitude: 73.3817, elevationMeters: 2408, difficulty: "easy", description: "A pine-covered ridge town in the Galiyat with broad Himalayan views." },
+  { ...common, regionSlug: "kpk-northern-areas", name: "Taxila", slug: "taxila", latitude: 33.746, longitude: 72.787, elevationMeters: 549, difficulty: "easy", description: "Ancient heritage near the foothills, often combined with trips toward the north." },
+  { ...common, regionSlug: "kpk-northern-areas", name: "Balakot", slug: "balakot", latitude: 34.555, longitude: 73.359, elevationMeters: 998, difficulty: "easy", description: "Gateway town at the mouth of Kaghan Valley along the Kunhar River." },
+  { ...common, regionSlug: "kpk-northern-areas", name: "Lulusar Lake", slug: "lulusar-lake", latitude: 35.0806, longitude: 73.0264, elevationMeters: 3410, difficulty: "hard", bestSeasonStart: 6, bestSeasonEnd: 9, description: "A high alpine lake on the road toward Babusar Pass.", requiresLocalTransport: true, localTransportNote: "Upper Kaghan access may require local mountain transport depending on season." },
+  { ...common, regionSlug: "kpk-northern-areas", name: "Babusar Pass", slug: "babusar-pass", latitude: 35.033, longitude: 73.568, elevationMeters: 4173, difficulty: "hard", bestSeasonStart: 6, bestSeasonEnd: 9, description: "Seasonal high pass linking Kaghan with Gilgit-Baltistan." },
 ];
 
 export const pickupCitySeed = [

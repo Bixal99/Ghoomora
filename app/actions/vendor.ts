@@ -2,10 +2,11 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { z } from "zod";
 import { HotelTier, Role, TierLevel, TransportMode, VehicleType, VendorType } from "@prisma/client";
 import { getDb } from "@/lib/db";
 import { requireActor } from "@/lib/auth";
-import { fareSchema, validPickupCombination, vehicleSchema, vendorSchema } from "@/lib/validation";
+import { fareSchema, localHireSchema, packageStopSchema, validLocalHireVehicle, validPickupCombination, vehicleSchema, vendorSchema } from "@/lib/validation";
 
 function values(formData: FormData, key: string) { return formData.getAll(key).map(String); }
 
@@ -37,6 +38,21 @@ export async function createFare(formData: FormData) {
   const vehicle = await db.vehicle.findFirst({ where: { id: data.vehicleId, vendorId: actor.vendor.id } });
   if (!vehicle || !validPickupCombination(vehicle.type, data.mode)) throw new Error("Unsupported pickup transport combination.");
   await db.vehicleFare.upsert({ where: { vehicleId_pickupCityId_regionId_mode: { vehicleId: vehicle.id, pickupCityId: data.pickupCityId, regionId: data.regionId, mode: data.mode as TransportMode } }, update: { price: data.price }, create: { vehicleId: vehicle.id, pickupCityId: data.pickupCityId, regionId: data.regionId, mode: data.mode as TransportMode, price: data.price } });
+  revalidatePath("/fleet");
+}
+
+export async function createLocalHireRate(formData: FormData) {
+  const db = getDb();
+  const actor = await requireActor([Role.VENDOR]);
+  if (!db || !actor.vendor) throw new Error("Vendor profile is required.");
+  const data = localHireSchema.parse(Object.fromEntries(formData));
+  const vehicle = await db.vehicle.findFirst({ where: { id: data.vehicleId, vendorId: actor.vendor.id } });
+  if (!vehicle || !validLocalHireVehicle(vehicle.type)) throw new Error("Local day-hire requires a WAGON, LAND_CRUISER, PRADO, or JEEP.");
+  await db.localHireRate.upsert({
+    where: { vehicleId_destinationId: { vehicleId: vehicle.id, destinationId: data.destinationId } },
+    update: { pricePerDay: data.pricePerDay },
+    create: { vehicleId: vehicle.id, destinationId: data.destinationId, pricePerDay: data.pricePerDay },
+  });
   revalidatePath("/fleet");
 }
 
@@ -84,4 +100,22 @@ export async function createPackage(formData: FormData) {
     { tier: TierLevel.LUXURY, vehicleType: VehicleType.COASTER, transportMode: TransportMode.PRIVATE, pricePerPersonPerDay: rates.LUXURY, hotelTier: HotelTier.LUXURY, includesGuide: true },
   ] } } });
   revalidatePath("/vendor/packages"); revalidatePath("/packages");
+}
+
+export async function updatePackageStops(formData: FormData) {
+  const db = getDb();
+  const actor = await requireActor([Role.VENDOR]);
+  if (!db || !actor.vendor) throw new Error("Vendor profile is required.");
+  const packageId = String(formData.get("packageId") ?? "");
+  const pkg = await db.package.findFirst({ where: { id: packageId, vendorId: actor.vendor.id } });
+  if (!pkg) throw new Error("Package not found.");
+  const stopsRaw = String(formData.get("stopsJson") ?? "[]");
+  const stops = z.array(packageStopSchema).parse(JSON.parse(stopsRaw));
+  if (!stops.length) throw new Error("At least one stop is required.");
+  await db.$transaction([
+    db.packageStop.deleteMany({ where: { packageId } }),
+    db.packageStop.createMany({ data: stops.map((stop) => ({ packageId, ...stop })) }),
+  ]);
+  revalidatePath("/vendor/packages");
+  revalidatePath("/packages");
 }

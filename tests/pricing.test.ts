@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { calculateEstimate } from "../lib/pricing";
+import { calculateEstimate } from "../lib/pricing-core";
 
 const pkg = { minDays: 4, maxDays: 7 };
 const standard = { tier: "STANDARD" as const, pricePerPersonPerDay: 10000 };

@@ -18,6 +18,18 @@ export const fareSchema = z.object({
   mode: z.enum(["SHARED", "PRIVATE"]), price: z.coerce.number().int().positive(),
 });
 
+export const localHireSchema = z.object({
+  vehicleId: z.string().min(1),
+  destinationId: z.string().min(1),
+  pricePerDay: z.coerce.number().int().positive(),
+});
+
+export const packageStopSchema = z.object({
+  destinationId: z.string().min(1),
+  dayNumber: z.coerce.number().int().positive(),
+  stopType: z.enum(["overnight", "meal", "fuel", "prayer", "viewpoint"]),
+});
+
 export function validPickupCombination(type: string, mode: string) {
   return (type === "COASTER" && (mode === "SHARED" || mode === "PRIVATE")) || (type === "CAR" && mode === "PRIVATE");
 }

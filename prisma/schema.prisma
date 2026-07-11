@@ -55,15 +55,18 @@ enum VendorType {
 }
 
 model User {
-  id       String    @id @default(cuid())
-  clerkId  String    @unique
-  role     Role      @default(CUSTOMER)
-  name     String
-  email    String    @unique
-  phone    String?
-  vendor   Vendor?
-  bookings Booking[]
-  reviews  Review[]
+  id                  String    @id @default(cuid())
+  clerkId             String    @unique
+  role                Role      @default(CUSTOMER)
+  name                String
+  email               String    @unique
+  phone               String?
+  completedTripsCount Int       @default(0)
+  travelerLevel       String    @default("EXPLORER")
+  badges              String[]  @default([])
+  vendor              Vendor?
+  bookings            Booking[]
+  reviews             Review[]
 
   @@index([role])
 }

@@ -30,6 +30,21 @@ function fallbackRegions(): RegionView[] {
   });
 }
 
+function isMissingDatabaseSchema(error: unknown) {
+  if (!error || typeof error !== "object") return false;
+  const candidate = error as { code?: unknown; message?: unknown };
+  return candidate.code === "P2021" || (typeof candidate.message === "string" && candidate.message.includes("does not exist in the current database"));
+}
+
+async function withSchemaFallback<T>(query: () => Promise<T>, fallback: () => T) {
+  try {
+    return await query();
+  } catch (error) {
+    if (isMissingDatabaseSchema(error)) return fallback();
+    throw error;
+  }
+}
+
 const fallbackTiers: TierView[] = [
   { id: "sample-standard", tier: "STANDARD", vehicleType: "COASTER", transportMode: "SHARED", pricePerPersonPerDay: 9500, hotelTier: "BUDGET", includesGuide: false },
   { id: "sample-moderate", tier: "MODERATE", vehicleType: "CAR", transportMode: "PRIVATE", pricePerPersonPerDay: 16500, hotelTier: "MID", includesGuide: false },
@@ -49,8 +64,10 @@ function fallbackPackages(): PackageView[] {
 export async function getRegions() {
   const db = getDb();
   if (!db) return fallbackRegions();
-  const rows = await db.region.findMany({ include: { destinations: { include: { region: true }, orderBy: { name: "asc" } } }, orderBy: { name: "asc" } });
-  return rows.map((row) => ({ ...row, blurb: regionSeed.find((seed) => seed.slug === row.slug)?.blurb ?? "Discover the region with Ghoomora." })) as RegionView[];
+  return withSchemaFallback(async () => {
+    const rows = await db.region.findMany({ include: { destinations: { include: { region: true }, orderBy: { name: "asc" } } }, orderBy: { name: "asc" } });
+    return rows.map((row) => ({ ...row, blurb: regionSeed.find((seed) => seed.slug === row.slug)?.blurb ?? "Discover the region with Ghoomora." })) as RegionView[];
+  }, fallbackRegions);
 }
 
 export async function getRegion(slug: string) { return (await getRegions()).find((region) => region.slug === slug) ?? null; }
@@ -59,12 +76,15 @@ export async function getDestination(slug: string) { return (await getRegions())
 export async function getPackages(): Promise<PackageView[]> {
   const db = getDb();
   if (!db) return fallbackPackages();
-  return db.package.findMany({ where: { vendor: { verified: true } }, include: { vendor: { select: { businessName: true, verified: true } }, tiers: { orderBy: { pricePerPersonPerDay: "asc" } }, stops: { include: { destination: { include: { region: true } } }, orderBy: { dayNumber: "asc" } } }, orderBy: { title: "asc" } }) as unknown as PackageView[];
+  return withSchemaFallback(
+    () => db.package.findMany({ where: { vendor: { verified: true } }, include: { vendor: { select: { businessName: true, verified: true } }, tiers: { orderBy: { pricePerPersonPerDay: "asc" } }, stops: { include: { destination: { include: { region: true } } }, orderBy: { dayNumber: "asc" } } }, orderBy: { title: "asc" } }) as unknown as Promise<PackageView[]>,
+    fallbackPackages,
+  );
 }
 
 export async function getPackage(id: string) { return (await getPackages()).find((item) => item.id === id) ?? null; }
 export async function getPickupCities() {
   const db = getDb();
   if (!db) return pickupCitySeed.map((city) => ({ ...city, id: city.slug }));
-  return db.pickupCity.findMany({ orderBy: { name: "asc" } });
+  return withSchemaFallback(() => db.pickupCity.findMany({ orderBy: { name: "asc" } }), () => pickupCitySeed.map((city) => ({ ...city, id: city.slug })));
 }
