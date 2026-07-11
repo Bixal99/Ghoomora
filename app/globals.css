@@ -73,38 +73,12 @@ button { cursor: pointer; }
   background: radial-gradient(circle at 70% 25%, #4b8c7c 0, #214c41 31%, #0c2923 72%);
 }
 
-.loader-grid {
+.loader-topo-grid {
   background-image:
     linear-gradient(to right, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
     linear-gradient(to bottom, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
   background-size: 48px 48px;
-  mask-image: radial-gradient(circle at center, black 25%, transparent 80%);
-}
-
-.loader-border-glow {
-  padding: 2px;
-  border-radius: 1.75rem;
-  background: conic-gradient(from 0deg, #e7a94e, #4b8c7c, #214c41, #e7a94e);
-  animation: loader-border-spin 4s linear infinite;
-}
-
-.loader-border-glow > * {
-  border-radius: calc(1.75rem - 2px);
-}
-
-.loader-shimmer {
-  background: linear-gradient(90deg, transparent, #e7a94e, #cbe4db, transparent);
-  background-size: 200% 100%;
-  animation: loader-shimmer-slide 1.6s ease-in-out infinite;
-}
-
-@keyframes loader-border-spin {
-  to { transform: rotate(360deg); }
-}
-
-@keyframes loader-shimmer-slide {
-  0% { transform: translateX(-120%); background-position: 0% 50%; }
-  100% { transform: translateX(220%); background-position: 100% 50%; }
+  mask-image: radial-gradient(circle at 30% 40%, black 20%, transparent 75%);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -115,12 +89,8 @@ button { cursor: pointer; }
     transition: none !important;
     opacity: 1 !important;
   }
-  .loader-border-glow, .loader-shimmer {
-    animation: none !important;
-  }
-  .loader-shimmer {
-    width: 66%;
-    transform: none;
-    background: #e7a94e;
+  .loader-progress {
+    transform: scaleX(0.66) !important;
+    transform-origin: left center;
   }
 }

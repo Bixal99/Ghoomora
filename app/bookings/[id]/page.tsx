@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { Download, Star } from "lucide-react";
 import { cancelBooking, updateBookingStatus } from "@/app/actions/booking";
@@ -49,7 +48,11 @@ export default async function BookingPage({ params }: { params: Promise<{ id: st
           <Card className="mt-8 p-7">
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div><p className="text-sm text-muted-foreground">Total paid estimate</p><p className="text-3xl font-extrabold">{formatPKR(booking.totalPrice)}</p></div>
-              <Button asChild variant="outline"><Link href={"/api/bookings/" + booking.id + "/voucher"}><Download size={16} /> Download e-voucher</Link></Button>
+              <Button asChild variant="outline">
+                <a href={"/api/bookings/" + booking.id + "/voucher"}>
+                  <Download size={16} /> Download e-voucher
+                </a>
+              </Button>
             </div>
             <div className="mt-6 grid gap-2 text-sm"><p>Pickup: {booking.pickupCity.name}</p><p>Tier: {booking.tier.tier}</p><p>Operator: {booking.package.vendor.businessName}</p></div>
           </Card>
