@@ -6,13 +6,33 @@ const requestSchema = z.object({ slug: z.string().trim().min(1) }).strict();
 
 export async function GET(request: Request) {
   const slug = new URL(request.url).searchParams.get("slug");
+
+  let destinationSlug: string;
   try {
-    const { slug: destinationSlug } = requestSchema.parse({ slug });
-    const destination = await getDestination(destinationSlug);
-    if (!destination) return Response.json({ error: "Destination not found." }, { status: 404 });
-    const points = await querySafetyPoints(destination.latitude, destination.longitude);
-    return Response.json({ destination: destination.name, points, provider: "overpass" });
-  } catch (error) {
-    return Response.json({ error: error instanceof Error ? error.message : "Safety lookup failed." }, { status: 503 });
+    destinationSlug = requestSchema.parse({ slug }).slug;
+  } catch {
+    return Response.json({ error: "A valid destination slug is required." }, { status: 400 });
   }
+
+  const destination = await getDestination(destinationSlug);
+  if (!destination) return Response.json({ error: "Destination not found." }, { status: 404 });
+
+  const result = await querySafetyPoints(destination.latitude, destination.longitude);
+  if (!result) {
+    return Response.json({
+      destination: destination.name,
+      points: [],
+      provider: "overpass",
+      degraded: true,
+      message: "Safety lookup temporarily unavailable.",
+    });
+  }
+
+  return Response.json({
+    destination: destination.name,
+    points: result.points,
+    provider: "overpass",
+    mirror: result.mirror,
+    degraded: false,
+  });
 }

@@ -4,8 +4,10 @@ import { PrismaClient, HotelTier, TierLevel, TransportMode, VehicleType, VendorT
 import { Pool } from "pg";
 import { destinationSeed, pickupCitySeed, regionSeed } from "./seed-data";
 
+import { resolvePgConnectionString } from "../lib/pg-connection";
+
 if (!process.env.DATABASE_URL) throw new Error("DATABASE_URL is required to seed Ghoomora.");
-const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+const pool = new Pool({ connectionString: resolvePgConnectionString(process.env.DATABASE_URL) });
 const prisma = new PrismaClient({ adapter: new PrismaPg(pool) });
 
 async function main() {

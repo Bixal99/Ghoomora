@@ -13,21 +13,41 @@ export function AiTripAssistant({ regionSlug }: { regionSlug?: string }) {
   const [stops, setStops] = useState<Array<{ dayNumber: number; destinationName: string; stopType: string; note?: string }>>([]);
   const [estimate, setEstimate] = useState<{ total: number; disclaimer: string } | null>(null);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [planned, setPlanned] = useState(false);
 
   async function runPlanner() {
     setLoading(true);
-    const response = await fetch("/api/ai-planner", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ mode: "planner", budget, days, interests, regionSlug }) });
-    const body = await response.json();
-    setStops(body.stops ?? []);
-    setLoading(false);
+    setError("");
+    try {
+      const response = await fetch("/api/ai-planner", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ mode: "planner", budget, days, interests, regionSlug }) });
+      const body = await response.json();
+      if (!response.ok) throw new Error(body.error ?? "Could not build an itinerary. Try adjusting your inputs.");
+      setStops(body.stops ?? []);
+      setPlanned(true);
+    } catch (reason) {
+      setStops([]);
+      setPlanned(true);
+      setError(reason instanceof Error ? reason.message : "AI planner is unavailable right now.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   async function runEstimator() {
     setLoading(true);
-    const response = await fetch("/api/ai-planner", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ mode: "estimator", days, travelers: 2, tier: "MODERATE", regionSlug }) });
-    const body = await response.json();
-    setEstimate(body);
-    setLoading(false);
+    setError("");
+    try {
+      const response = await fetch("/api/ai-planner", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ mode: "estimator", days, travelers: 2, tier: "MODERATE", regionSlug }) });
+      const body = await response.json();
+      if (!response.ok) throw new Error(body.error ?? "Could not estimate this trip. Try adjusting your inputs.");
+      setEstimate(body);
+    } catch (reason) {
+      setEstimate(null);
+      setError(reason instanceof Error ? reason.message : "AI estimator is unavailable right now.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -39,8 +59,10 @@ export function AiTripAssistant({ regionSlug }: { regionSlug?: string }) {
         <label className="text-sm font-bold">Days<input type="number" min={2} max={21} value={days} onChange={(event) => setDays(Number(event.target.value))} className="focus-ring mt-2 h-11 w-full rounded-xl border bg-white px-3" /></label>
         <label className="text-sm font-bold md:col-span-1">Interests<input value={interests} onChange={(event) => setInterests(event.target.value)} className="focus-ring mt-2 h-11 w-full rounded-xl border bg-white px-3" /></label>
       </div>
-      <div className="mt-4 flex flex-wrap gap-2"><Button type="button" disabled={loading} onClick={runPlanner}>Suggest itinerary</Button><Button type="button" variant="outline" disabled={loading} onClick={runEstimator}>Estimate costs</Button></div>
+      <div className="mt-4 flex flex-wrap gap-2"><Button type="button" disabled={loading} onClick={runPlanner}>{loading ? "Planning…" : "Suggest itinerary"}</Button><Button type="button" variant="outline" disabled={loading} onClick={runEstimator}>Estimate costs</Button></div>
+      {error && <p className="mt-5 rounded-xl bg-[#fff4dc] p-3 text-sm text-[#725f42]">{error}</p>}
       {stops.length > 0 && <ol className="mt-6 space-y-2 text-sm">{stops.map((stop) => <li key={stop.dayNumber} className="rounded-xl bg-muted p-3"><strong>Day {stop.dayNumber}:</strong> {stop.destinationName} · {stop.stopType}{stop.note ? " — " + stop.note : ""}</li>)}</ol>}
+      {planned && !error && stops.length === 0 && <p className="mt-6 text-sm text-muted-foreground">No itinerary could be built for those inputs. Try widening the days or interests.</p>}
       {estimate && <p className="mt-6 text-sm"><strong>Estimated total:</strong> {formatPKR(estimate.total)}. {estimate.disclaimer}</p>}
     </Card>
   );

@@ -1,43 +1,52 @@
 import "server-only";
+import {
+  OVERPASS_MIRRORS,
+  buildSafetyQuery,
+  overpassPayloadHasError,
+  parseSafetyElements,
+  type SafetyPointResult,
+} from "@/lib/overpass-core";
 
-export type SafetyPointResult = {
-  type: string;
-  name: string;
-  latitude: number;
-  longitude: number;
-  phone?: string;
-};
+export type { SafetyPointResult } from "@/lib/overpass-core";
+export { buildSafetyQuery, parseSafetyElements } from "@/lib/overpass-core";
 
-function classify(tags: Record<string, string>) {
-  if (tags.amenity === "hospital") return "hospital";
-  if (tags.amenity === "police") return "police";
-  if (tags.amenity === "fuel") return "petrol";
-  if (tags.shop === "car_repair") return "mechanic";
-  if (tags.barrier === "checkpoint") return "checkpoint";
-  return null;
-}
+const ATTEMPT_TIMEOUT_MS = 12_000;
 
-export async function querySafetyPoints(latitude: number, longitude: number, radiusMeters = 50_000): Promise<SafetyPointResult[]> {
-  const around = `(around:${radiusMeters},${latitude},${longitude})`;
-  const query = `[out:json][timeout:25];(node["amenity"="hospital"]${around};node["amenity"="police"]${around};node["amenity"="fuel"]${around};node["shop"="car_repair"]${around};node["barrier"="checkpoint"]${around};);out center 40;`;
-  const response = await fetch("https://overpass-api.de/api/interpreter", {
+async function fetchMirror(mirror: string, query: string) {
+  const response = await fetch(mirror, {
     method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+      "User-Agent": "Ghoomora/1.0 (safety lookup)",
+    },
     body: "data=" + encodeURIComponent(query),
     next: { revalidate: 86400 },
-    signal: AbortSignal.timeout(20_000),
+    signal: AbortSignal.timeout(ATTEMPT_TIMEOUT_MS),
   });
-  if (!response.ok) throw new Error("Overpass API unavailable.");
-  const payload = await response.json() as { elements?: Array<{ lat?: number; lon?: number; center?: { lat: number; lon: number }; tags?: Record<string, string> }> };
-  const results: SafetyPointResult[] = [];
-  for (const element of payload.elements ?? []) {
-    const lat = element.lat ?? element.center?.lat;
-    const lon = element.lon ?? element.center?.lon;
-    if (lat == null || lon == null) continue;
-    const tags = element.tags ?? {};
-    const type = classify(tags);
-    if (!type) continue;
-    results.push({ type, name: tags.name ?? tags.operator ?? type, latitude: lat, longitude: lon, phone: tags.phone ?? tags["contact:phone"] });
+  if (!response.ok) throw new Error(`Overpass mirror ${mirror} returned ${response.status}.`);
+  const payload = await response.json();
+  const error = overpassPayloadHasError(payload);
+  if (error) throw new Error(error);
+  return { points: parseSafetyElements((payload as { elements?: Parameters<typeof parseSafetyElements>[0] }).elements), mirror };
+}
+
+export async function querySafetyPoints(
+  latitude: number,
+  longitude: number,
+  radiusMeters = 35_000,
+): Promise<{ points: SafetyPointResult[]; mirror: string } | null> {
+  const query = buildSafetyQuery(latitude, longitude, radiusMeters);
+  const failures: string[] = [];
+
+  for (const mirror of OVERPASS_MIRRORS) {
+    try {
+      return await fetchMirror(mirror, query);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Unknown Overpass failure.";
+      failures.push(`${mirror}: ${message}`);
+    }
   }
-  return results.slice(0, 40);
+
+  console.error(JSON.stringify({ scope: "overpass-safety", latitude, longitude, failures }));
+  return null;
 }

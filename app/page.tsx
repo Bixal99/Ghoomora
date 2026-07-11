@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowRight, BedDouble, BusFront, Compass, Map, ShieldCheck, Sparkles, TentTree, UsersRound } from "lucide-react";
 import { HeroScene } from "@/components/hero-scene";
+import { GradientText } from "@/components/reactbits/gradient-text";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { DestinationCard } from "@/components/destination-card";
@@ -22,7 +23,7 @@ export default async function Home() {
         <div className="container-shell relative z-10 flex min-h-[760px] items-center pt-24">
           <div className="max-w-3xl pb-20">
             <p className="eyebrow mb-6 text-accent">Northern Pakistan · one thoughtful journey</p>
-            <h1 className="display-title text-[clamp(4rem,10vw,8.5rem)] leading-[.78]">Go beyond<br /><span className="italic text-[#cbe4db]">the postcard.</span></h1>
+            <h1 className="display-title text-[clamp(4rem,10vw,8.5rem)] leading-[.78]">Go beyond<br /><GradientText className="italic">the postcard.</GradientText></h1>
             <p className="mt-8 max-w-xl text-base leading-8 text-white/72 md:text-lg">Discover mountain regions, compare transparent trip tiers and plan with local operators—without losing the practical details that matter on the road.</p>
             <div className="mt-9 flex flex-wrap gap-3">
               <Button asChild size="lg" variant="accent"><Link href="/regions/gilgit-baltistan">Explore destinations <ArrowRight size={18} /></Link></Button>

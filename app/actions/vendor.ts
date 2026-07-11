@@ -10,13 +10,17 @@ import { fareSchema, localHireSchema, packageStopSchema, validLocalHireVehicle, 
 
 function values(formData: FormData, key: string) { return formData.getAll(key).map(String); }
 
+const partnerRoles = [Role.VENDOR, Role.ADMIN] as const;
+
 export async function onboardVendor(formData: FormData) {
   const db = getDb();
-  const actor = await requireActor([Role.CUSTOMER, Role.VENDOR]);
+  const actor = await requireActor([Role.CUSTOMER, Role.VENDOR, Role.ADMIN]);
   if (!db) throw new Error("Database is not configured.");
   const parsed = vendorSchema.parse({ businessName: formData.get("businessName"), contactPhone: formData.get("contactPhone"), description: formData.get("description") || undefined, types: values(formData, "types") });
   await db.$transaction(async (tx) => {
-    await tx.user.update({ where: { id: actor.id }, data: { role: Role.VENDOR } });
+    if (actor.role !== Role.ADMIN) {
+      await tx.user.update({ where: { id: actor.id }, data: { role: Role.VENDOR } });
+    }
     await tx.vendor.upsert({ where: { ownerId: actor.id }, update: { ...parsed, types: parsed.types as VendorType[], verified: false }, create: { ownerId: actor.id, ...parsed, types: parsed.types as VendorType[] } });
   });
   revalidatePath("/dashboard");
@@ -24,7 +28,7 @@ export async function onboardVendor(formData: FormData) {
 }
 
 export async function createVehicle(formData: FormData) {
-  const db = getDb(); const actor = await requireActor([Role.VENDOR]);
+  const db = getDb(); const actor = await requireActor([...partnerRoles]);
   if (!db || !actor.vendor) throw new Error("Vendor profile is required.");
   const data = vehicleSchema.parse({ type: formData.get("type"), seats: formData.get("seats"), ac: formData.get("ac") === "on" });
   await db.vehicle.create({ data: { vendorId: actor.vendor.id, type: data.type as VehicleType, seats: data.seats, ac: data.ac } });
@@ -32,7 +36,7 @@ export async function createVehicle(formData: FormData) {
 }
 
 export async function createFare(formData: FormData) {
-  const db = getDb(); const actor = await requireActor([Role.VENDOR]);
+  const db = getDb(); const actor = await requireActor([...partnerRoles]);
   if (!db || !actor.vendor) throw new Error("Vendor profile is required.");
   const data = fareSchema.parse(Object.fromEntries(formData));
   const vehicle = await db.vehicle.findFirst({ where: { id: data.vehicleId, vendorId: actor.vendor.id } });
@@ -43,7 +47,7 @@ export async function createFare(formData: FormData) {
 
 export async function createLocalHireRate(formData: FormData) {
   const db = getDb();
-  const actor = await requireActor([Role.VENDOR]);
+  const actor = await requireActor([...partnerRoles]);
   if (!db || !actor.vendor) throw new Error("Vendor profile is required.");
   const data = localHireSchema.parse(Object.fromEntries(formData));
   const vehicle = await db.vehicle.findFirst({ where: { id: data.vehicleId, vendorId: actor.vendor.id } });
@@ -57,7 +61,7 @@ export async function createLocalHireRate(formData: FormData) {
 }
 
 export async function createHotel(formData: FormData) {
-  const db = getDb(); const actor = await requireActor([Role.VENDOR]);
+  const db = getDb(); const actor = await requireActor([...partnerRoles]);
   if (!db || !actor.vendor || !actor.vendor.types.includes(VendorType.HOTEL)) throw new Error("Hotel vendor profile is required.");
   const name = String(formData.get("name") ?? "").trim();
   const destinationId = String(formData.get("destinationId") ?? "");
@@ -68,7 +72,7 @@ export async function createHotel(formData: FormData) {
 }
 
 export async function upsertGuide(formData: FormData) {
-  const db = getDb(); const actor = await requireActor([Role.VENDOR]);
+  const db = getDb(); const actor = await requireActor([...partnerRoles]);
   if (!db || !actor.vendor || !actor.vendor.types.includes(VendorType.GUIDE)) throw new Error("Guide vendor profile is required.");
   const data = { languages: String(formData.get("languages") ?? "").split(",").map((item) => item.trim()).filter(Boolean), yearsExperience: Number(formData.get("yearsExperience")), dailyRate: Number(formData.get("dailyRate")), certified: formData.get("certified") === "on" };
   if (!data.languages.length || data.yearsExperience < 0 || data.dailyRate <= 0) throw new Error("Invalid guide profile.");
@@ -77,7 +81,7 @@ export async function upsertGuide(formData: FormData) {
 }
 
 export async function createCamp(formData: FormData) {
-  const db = getDb(); const actor = await requireActor([Role.VENDOR]);
+  const db = getDb(); const actor = await requireActor([...partnerRoles]);
   if (!db || !actor.vendor || !actor.vendor.types.includes(VendorType.CAMP)) throw new Error("Camp vendor profile is required.");
   const data = { name: String(formData.get("name") ?? "").trim(), amenities: String(formData.get("amenities") ?? "").split(",").map((item) => item.trim()).filter(Boolean), capacityTents: Number(formData.get("capacityTents")), pricePerNight: Number(formData.get("pricePerNight")) };
   if (data.name.length < 3 || data.capacityTents < 1 || data.pricePerNight <= 0) throw new Error("Invalid camp details.");
@@ -86,7 +90,7 @@ export async function createCamp(formData: FormData) {
 }
 
 export async function createPackage(formData: FormData) {
-  const db = getDb(); const actor = await requireActor([Role.VENDOR]);
+  const db = getDb(); const actor = await requireActor([...partnerRoles]);
   if (!db || !actor.vendor) throw new Error("Vendor profile is required.");
   const minDays = Number(formData.get("minDays")); const maxDays = Number(formData.get("maxDays"));
   if (minDays < 2 || maxDays < minDays) throw new Error("Invalid day range.");
@@ -104,7 +108,7 @@ export async function createPackage(formData: FormData) {
 
 export async function updatePackageStops(formData: FormData) {
   const db = getDb();
-  const actor = await requireActor([Role.VENDOR]);
+  const actor = await requireActor([...partnerRoles]);
   if (!db || !actor.vendor) throw new Error("Vendor profile is required.");
   const packageId = String(formData.get("packageId") ?? "");
   const pkg = await db.package.findFirst({ where: { id: packageId, vendorId: actor.vendor.id } });

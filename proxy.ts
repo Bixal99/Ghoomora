@@ -1,21 +1,7 @@
-import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
+import { clerkMiddleware } from "@clerk/nextjs/server";
 
-const isProtectedRoute = createRouteMatcher([
-  "/dashboard(.*)",
-  "/fleet(.*)",
-  "/hotels(.*)",
-  "/guide-profile(.*)",
-  "/camps(.*)",
-  "/vendor(.*)",
-  "/approvals(.*)",
-  "/checkout(.*)",
-  "/bookings(.*)",
-  "/analytics(.*)",
-]);
-
-export default clerkMiddleware(async (auth, req) => {
-  if (isProtectedRoute(req)) await auth.protect();
-});
+// Auth is enforced per route via getActor/requireActor in pages, layouts, and server actions.
+export default clerkMiddleware();
 
 export const config = {
   matcher: [

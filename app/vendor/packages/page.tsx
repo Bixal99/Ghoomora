@@ -13,7 +13,9 @@ export const dynamic = "force-dynamic";
 export default async function VendorPackagesPage() {
   const actor = await getActor();
   const db = getDb();
-  if (!actor?.vendor || !db) return <PortalShell><AccessPanel /></PortalShell>;
+  if (!db) return <PortalShell><AccessPanel /></PortalShell>;
+  if (!actor) return <PortalShell><AccessPanel redirectTo="/vendor/packages" /></PortalShell>;
+  if (!actor.vendor) return <PortalShell><AccessPanel needsOnboarding /></PortalShell>;
   const [packages, destinations] = await Promise.all([
     db.package.findMany({ where: { vendorId: actor.vendor.id }, include: { tiers: true, stops: { include: { destination: true }, orderBy: { dayNumber: "asc" } } } }),
     db.destination.findMany({ include: { region: true }, orderBy: { name: "asc" } }),

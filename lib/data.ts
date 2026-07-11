@@ -83,6 +83,25 @@ export async function getPackages(): Promise<PackageView[]> {
 }
 
 export async function getPackage(id: string) { return (await getPackages()).find((item) => item.id === id) ?? null; }
+
+export async function getPackagesForDestination(destinationSlug: string): Promise<PackageView[]> {
+  const db = getDb();
+  const fallback = () => fallbackPackages().filter((item) => item.stops.some((stop) => stop.destination.slug === destinationSlug));
+  if (!db) return fallback();
+  return withSchemaFallback(
+    () =>
+      db.package.findMany({
+        where: { vendor: { verified: true }, stops: { some: { destination: { slug: destinationSlug } } } },
+        include: {
+          vendor: { select: { businessName: true, verified: true } },
+          tiers: { orderBy: { pricePerPersonPerDay: "asc" } },
+          stops: { include: { destination: { include: { region: true } } }, orderBy: { dayNumber: "asc" } },
+        },
+        orderBy: { title: "asc" },
+      }) as unknown as Promise<PackageView[]>,
+    fallback,
+  );
+}
 export async function getPickupCities() {
   const db = getDb();
   if (!db) return pickupCitySeed.map((city) => ({ ...city, id: city.slug }));

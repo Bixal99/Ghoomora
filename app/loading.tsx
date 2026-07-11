@@ -1,1 +1,9 @@
-export default function Loading() { return <main className="grid min-h-[70vh] place-items-center bg-[#e5eee9]"><div className="text-center"><div className="mx-auto size-10 animate-spin rounded-full border-4 border-primary/20 border-t-primary" /><p className="eyebrow mt-5 text-[#5a7f73]">Mapping the way</p></div></main>; }
+import { MountainLoader } from "@/components/reactbits/mountain-loader";
+
+export default function Loading() {
+  return (
+    <main className="grid min-h-[70vh] place-items-center bg-[#e5eee9]">
+      <MountainLoader />
+    </main>
+  );
+}

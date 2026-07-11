@@ -18,28 +18,32 @@ export function PackageConfigurator({ pkg, cities }: { pkg: PackageView; cities:
   const [resolved, setResolved] = useState<Awaited<ReturnType<typeof getPriceEstimate>> | null>(null);
   const [pending, startTransition] = useTransition();
   const tier = pkg.tiers.find((item) => item.id === tierId) ?? pkg.tiers[0];
-  const roughStops = Array.from(new Set(pkg.stops.filter((stop) => stop.destination.requiresLocalTransport).map((stop) => stop.destination.slug)));
+  const roughStops = useMemo(
+    () => Array.from(new Set(pkg.stops.filter((stop) => stop.destination.requiresLocalTransport).map((stop) => stop.destination.slug))),
+    [pkg],
+  );
 
   useEffect(() => {
-    if (!tier) return;
+    const activeTier = pkg.tiers.find((item) => item.id === tierId) ?? pkg.tiers[0];
+    if (!activeTier) return;
     startTransition(async () => {
       try {
-        const estimate = await getPriceEstimate({ packageId: pkg.id, tierId: tier.id, pickupCitySlug: pickupCity, selectedDays: days, travelerCount: travelers });
+        const estimate = await getPriceEstimate({ packageId: pkg.id, tierId: activeTier.id, pickupCitySlug: pickupCity, selectedDays: days, travelerCount: travelers });
         setResolved(estimate);
       } catch {
-        const pickupBase = demoPickupFare(tier, pickupCity);
-        const pickupFare = tier.transportMode === "SHARED" ? pickupBase * travelers : pickupBase;
+        const pickupBase = demoPickupFare(activeTier, pickupCity);
+        const pickupFare = activeTier.transportMode === "SHARED" ? pickupBase * travelers : pickupBase;
         setResolved({
-          ...calculateEstimate(pkg, tier, { selectedDays: days, travelerCount: travelers, pickupFare, localHireRates: roughStops.map(() => 18000) }),
+          ...calculateEstimate(pkg, activeTier, { selectedDays: days, travelerCount: travelers, pickupFare, localHireRates: roughStops.map(() => 18000) }),
           canCheckout: false,
           missingLocalHire: [],
           usingDemo: true,
         });
       }
     });
-  }, [days, travelers, tier, pickupCity, pkg, roughStops]);
+  }, [days, travelers, tierId, pickupCity, pkg, roughStops]);
 
-  const estimate = useMemo(() => resolved, [resolved]);
+  const estimate = resolved;
 
   if (!tier || !estimate) return <Card className="p-6">This package does not have a complete tier configuration.</Card>;
 

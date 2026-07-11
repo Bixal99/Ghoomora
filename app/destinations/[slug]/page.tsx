@@ -8,7 +8,7 @@ import { WeatherForecastPanel } from "@/components/weather-forecast";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { getDestination, getPackages } from "@/lib/data";
+import { getDestination, getPackagesForDestination } from "@/lib/data";
 import { getWeatherForecast } from "@/lib/weather";
 
 export const dynamic = "force-dynamic";
@@ -17,8 +17,7 @@ const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "
 export default async function DestinationPage({ params }: { params: Promise<{ slug: string }> }) {
   const destination = await getDestination((await params).slug);
   if (!destination) notFound();
-  const [packages, forecast] = await Promise.all([getPackages(), getWeatherForecast(destination)]);
-  const related = packages.filter((item) => item.stops.some((stop) => stop.destination.slug === destination.slug));
+  const [related, forecast] = await Promise.all([getPackagesForDestination(destination.slug), getWeatherForecast(destination)]);
   return (
     <>
       <InnerHeader />
