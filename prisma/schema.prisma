@@ -1,0 +1,320 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Region {
+  id           String        @id @default(cuid())
+  name         String
+  slug         String        @unique
+  destinations Destination[]
+  fares        VehicleFare[]
+
+  @@index([name])
+}
+
+model Destination {
+  id                     String          @id @default(cuid())
+  regionId               String
+  region                 Region          @relation(fields: [regionId], references: [id])
+  name                   String
+  slug                   String          @unique
+  latitude               Float
+  longitude              Float
+  elevationMeters        Int
+  bestSeasonStart        Int
+  bestSeasonEnd          Int
+  difficulty             String?
+  description            String
+  heroImageUrl           String?
+  requiresLocalTransport Boolean         @default(false)
+  localTransportNote     String?
+  packageStops           PackageStop[]
+  hotels                 Hotel[]
+  safetyPoints           SafetyPoint[]
+  localHireRates         LocalHireRate[]
+
+  @@index([regionId, name])
+  @@index([requiresLocalTransport])
+}
+
+enum Role {
+  CUSTOMER
+  VENDOR
+  ADMIN
+}
+
+enum VendorType {
+  TRANSPORT
+  HOTEL
+  GUIDE
+  CAMP
+}
+
+model User {
+  id       String    @id @default(cuid())
+  clerkId  String    @unique
+  role     Role      @default(CUSTOMER)
+  name     String
+  email    String    @unique
+  phone    String?
+  vendor   Vendor?
+  bookings Booking[]
+  reviews  Review[]
+
+  @@index([role])
+}
+
+model Vendor {
+  id           String        @id @default(cuid())
+  ownerId      String        @unique
+  owner        User          @relation(fields: [ownerId], references: [id])
+  businessName String
+  types        VendorType[]
+  verified     Boolean       @default(false)
+  contactPhone String
+  description  String?
+  vehicles     Vehicle[]
+  hotels       Hotel[]
+  guideProfile GuideProfile?
+  campSites    CampSite[]
+  packages     Package[]
+
+  @@index([verified])
+}
+
+enum VehicleType {
+  WAGON
+  COASTER
+  CAR
+  LAND_CRUISER
+  PRADO
+  JEEP
+}
+
+enum TransportMode {
+  SHARED
+  PRIVATE
+}
+
+model PickupCity {
+  id       String        @id @default(cuid())
+  name     String        @unique
+  slug     String        @unique
+  fares    VehicleFare[]
+  bookings Booking[]
+}
+
+model Vehicle {
+  id             String          @id @default(cuid())
+  vendorId       String
+  vendor         Vendor          @relation(fields: [vendorId], references: [id])
+  type           VehicleType
+  seats          Int
+  ac             Boolean
+  fares          VehicleFare[]
+  localHireRates LocalHireRate[]
+
+  @@index([vendorId, type])
+}
+
+model VehicleFare {
+  id           String        @id @default(cuid())
+  vehicleId    String
+  vehicle      Vehicle       @relation(fields: [vehicleId], references: [id])
+  mode         TransportMode
+  pickupCityId String
+  pickupCity   PickupCity    @relation(fields: [pickupCityId], references: [id])
+  regionId     String
+  region       Region        @relation(fields: [regionId], references: [id])
+  price        Int
+
+  @@unique([vehicleId, pickupCityId, regionId, mode])
+  @@index([pickupCityId, regionId, mode])
+}
+
+model LocalHireRate {
+  id            String      @id @default(cuid())
+  vehicleId     String
+  vehicle       Vehicle     @relation(fields: [vehicleId], references: [id])
+  destinationId String
+  destination   Destination @relation(fields: [destinationId], references: [id])
+  pricePerDay   Int
+
+  @@unique([vehicleId, destinationId])
+  @@index([destinationId])
+}
+
+enum HotelTier {
+  BUDGET
+  MID
+  LUXURY
+}
+
+model Hotel {
+  id            String      @id @default(cuid())
+  vendorId      String
+  vendor        Vendor      @relation(fields: [vendorId], references: [id])
+  destinationId String
+  destination   Destination @relation(fields: [destinationId], references: [id])
+  name          String
+  tier          HotelTier
+  rooms         Room[]
+
+  @@index([vendorId])
+  @@index([destinationId, tier])
+}
+
+model Room {
+  id            String  @id @default(cuid())
+  hotelId       String
+  hotel         Hotel   @relation(fields: [hotelId], references: [id])
+  type          String
+  capacity      Int
+  pricePerNight Int
+  available     Boolean @default(true)
+
+  @@index([hotelId, available])
+}
+
+model GuideProfile {
+  id              String  @id @default(cuid())
+  vendorId        String  @unique
+  vendor          Vendor  @relation(fields: [vendorId], references: [id])
+  languages       String[]
+  yearsExperience Int
+  dailyRate       Int
+  certified       Boolean @default(false)
+}
+
+model CampSite {
+  id            String   @id @default(cuid())
+  vendorId      String
+  vendor        Vendor   @relation(fields: [vendorId], references: [id])
+  name          String
+  amenities     String[]
+  capacityTents Int
+  pricePerNight Int
+
+  @@index([vendorId])
+}
+
+enum TierLevel {
+  STANDARD
+  MODERATE
+  LUXURY
+}
+
+model Package {
+  id          String        @id @default(cuid())
+  vendorId    String
+  vendor      Vendor        @relation(fields: [vendorId], references: [id])
+  title       String
+  description String
+  minDays     Int
+  maxDays     Int
+  stops       PackageStop[]
+  tiers       PackageTier[]
+  bookings    Booking[]
+
+  @@index([vendorId])
+  @@index([minDays, maxDays])
+}
+
+model PackageTier {
+  id                   String        @id @default(cuid())
+  packageId            String
+  package              Package       @relation(fields: [packageId], references: [id])
+  tier                 TierLevel
+  vehicleType          VehicleType
+  transportMode        TransportMode
+  pricePerPersonPerDay Int
+  hotelTier            HotelTier
+  includesGuide        Boolean       @default(false)
+  bookings             Booking[]
+
+  @@unique([packageId, tier])
+  @@index([tier, pricePerPersonPerDay])
+}
+
+model PackageStop {
+  id            String      @id @default(cuid())
+  packageId     String
+  package       Package     @relation(fields: [packageId], references: [id])
+  destinationId String
+  destination   Destination @relation(fields: [destinationId], references: [id])
+  dayNumber     Int
+  stopType      String
+  hotelId       String?
+
+  @@index([packageId, dayNumber])
+  @@index([destinationId])
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+model Booking {
+  id           String        @id @default(cuid())
+  customerId   String
+  customer     User          @relation(fields: [customerId], references: [id])
+  packageId    String
+  package      Package       @relation(fields: [packageId], references: [id])
+  tierId       String
+  tier         PackageTier   @relation(fields: [tierId], references: [id])
+  pickupCityId String
+  pickupCity   PickupCity    @relation(fields: [pickupCityId], references: [id])
+  selectedDays Int
+  travelDate   DateTime
+  status       BookingStatus @default(PENDING)
+  totalPrice   Int
+  travelers    Traveler[]
+  review       Review?
+
+  @@index([customerId, status])
+  @@index([packageId, travelDate])
+}
+
+model Traveler {
+  id        String  @id @default(cuid())
+  bookingId String
+  booking   Booking @relation(fields: [bookingId], references: [id])
+  name      String
+  idNumber  String?
+  phone     String?
+
+  @@index([bookingId])
+}
+
+model Review {
+  id        String  @id @default(cuid())
+  bookingId String  @unique
+  booking   Booking @relation(fields: [bookingId], references: [id])
+  userId    String
+  user      User    @relation(fields: [userId], references: [id])
+  rating    Int
+  comment   String?
+
+  @@index([userId])
+}
+
+model SafetyPoint {
+  id            String      @id @default(cuid())
+  destinationId String
+  destination   Destination @relation(fields: [destinationId], references: [id])
+  type          String
+  name          String
+  latitude      Float
+  longitude     Float
+  phone         String?
+
+  @@index([destinationId, type])
+}
