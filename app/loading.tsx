@@ -1,5 +1,5 @@
-import { LoadingScreen } from "@/components/loading-screen";
+import { ColdLoadScreen } from "@/components/cold-load-screen";
 
 export default function Loading() {
-  return <LoadingScreen />;
+  return <ColdLoadScreen />;
 }
