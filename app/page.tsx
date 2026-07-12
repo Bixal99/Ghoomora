@@ -2,10 +2,13 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { ArrowRight, BedDouble, BusFront, Compass, Map, Route, ShieldCheck, TentTree, UsersRound } from "lucide-react";
 import { HeroScene } from "@/components/hero-scene";
+import { HeroTypewriter } from "@/components/hero-typewriter";
 import { HomeHeroCta } from "@/components/home-hero-cta";
 import { SiteHeaderShell } from "@/components/site-header-shell";
 import { SiteFooter } from "@/components/site-footer";
 import { DestinationCard } from "@/components/destination-card";
+import { RegionCard } from "@/components/region-card";
+import { RouteRibbon } from "@/components/route-ribbon";
 import { Reveal } from "@/components/reveal";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -31,7 +34,7 @@ export default async function Home() {
         <HeroScene />
         <div className="container-shell relative z-10 flex min-h-[720px] items-center pt-28">
           <div className="max-w-3xl pb-20">
-            <h1 className="display-title text-[clamp(3.35rem,9.2vw,7.75rem)] leading-[.82] text-white">Go beyond the postcard.</h1>
+            <HeroTypewriter />
             <p className="mt-8 max-w-xl text-base leading-8 text-white/80 md:text-lg">Explore mountain places and plan with local operators—clear details for the road ahead.</p>
             <HomeHeroCta />
           </div>
@@ -70,8 +73,13 @@ export default async function Home() {
 
         <section id="regions" className="section-pad bg-[#e8efe9]">
           <div className="container-shell">
-            <Reveal className="grid gap-8 lg:grid-cols-[.75fr_1.25fr] lg:items-end">
-              <div><p className="eyebrow text-[#5a7f73]">Start with a region</p><h2 className="display-title mt-3 text-5xl leading-none md:text-7xl">Landscapes worth<br />planning around.</h2></div>
+            <Reveal className="grid gap-8 lg:grid-cols-[1fr_minmax(10rem,16rem)_1fr] lg:items-center">
+              <div>
+                <p className="eyebrow text-[#5a7f73]">Start with a region</p>
+                <h2 className="display-title mt-3 text-5xl leading-none md:text-7xl">Landscapes worth<br />planning around.</h2>
+                <RouteRibbon className="mt-5 w-44 lg:hidden" />
+              </div>
+              <RouteRibbon className="mx-auto hidden w-full max-w-xs lg:block" />
               <p className="max-w-xl text-base leading-8 text-muted-foreground lg:justify-self-end">Every destination belongs to a real region in Ghoomora’s database. Browse by geography first, then narrow by season, altitude, trip length and comfort.</p>
             </Reveal>
             {catalog.status === "setup" ? (
@@ -84,17 +92,7 @@ export default async function Home() {
               <div className="mt-12 grid gap-5 md:grid-cols-3">
                 {regions.map((region, index) => (
                   <Reveal key={region.slug} className="h-full">
-                    <Link
-                      href={"/regions/" + region.slug}
-                      className="focus-ring group flex h-full min-h-72 flex-col overflow-hidden rounded-[2rem] border border-white/10 bg-primary p-7 text-white shadow-[0_20px_55px_rgba(16,40,32,.13)] transition duration-300 hover:-translate-y-1.5 hover:shadow-[0_28px_70px_rgba(16,40,32,.18)]"
-                      style={{ backgroundColor: index === 1 ? "#294b61" : index === 2 ? "#755136" : undefined }}
-                    >
-                      <span className="grid size-12 place-items-center rounded-full bg-white/12"><Compass /></span>
-                      <p className="mt-16 text-sm text-white/55">{region.destinations.length} destinations</p>
-                      <h3 className="display-title mt-2 text-4xl">{region.name}</h3>
-                      {region.blurb ? <p className="mt-3 flex-1 text-sm leading-6 text-white/72">{region.blurb}</p> : <span className="flex-1" />}
-                      <span className="mt-7 inline-flex items-center gap-2 text-sm font-bold text-accent">Explore region <ArrowRight size={16} className="transition group-hover:translate-x-1" /></span>
-                    </Link>
+                    <RegionCard region={region} index={index} />
                   </Reveal>
                 ))}
               </div>

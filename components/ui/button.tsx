@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 const buttonVariants = cva("focus-ring relative inline-flex max-w-full select-none items-center justify-center gap-2 rounded-full border border-transparent text-center font-bold leading-tight shadow-sm transition duration-200 hover:-translate-y-0.5 hover:shadow-md active:translate-y-0 active:shadow-sm disabled:pointer-events-none disabled:translate-y-0 disabled:opacity-50", {
   variants: {
     variant: {
-      default: "bg-primary text-white hover:bg-[#205548]",
+      default: "bg-primary text-primary-foreground hover:bg-[#205548]",
       accent: "bg-accent text-[#15362d] hover:bg-[#f7c36f]",
       outline: "border-primary/20 bg-transparent text-foreground shadow-none hover:border-primary/35 hover:bg-white/70",
       ghost: "text-foreground shadow-none hover:bg-white/65",
