@@ -1,6 +1,7 @@
 import "server-only";
 import { getDb } from "@/lib/db";
 import { destinationSeed, pickupCitySeed, regionSeed } from "@/prisma/seed-data";
+import { SAMPLE_PACKAGE_TITLE } from "@/prisma/seed-artifacts";
 
 export type DestinationView = {
   id: string; name: string; slug: string; latitude: number; longitude: number;
@@ -55,7 +56,7 @@ function fallbackPackages(): PackageView[] {
   const regions = fallbackRegions();
   const find = (slug: string) => regions.flatMap((region) => region.destinations).find((destination) => destination.slug === slug)!;
   return [
-    { id: "sample-hunza", title: "Hunza Highlands — Sample", description: "Forts, glacial water and upper-Hunza horizons in one unhurried journey.", minDays: 5, maxDays: 8, vendor: { businessName: "Northbound Expeditions — Sample", verified: true }, tiers: fallbackTiers, stops: [{ dayNumber: 1, stopType: "overnight", destination: find("hunza-valley") }, { dayNumber: 3, stopType: "viewpoint", destination: find("attabad-lake") }, { dayNumber: 5, stopType: "viewpoint", destination: find("passu-cones") }] },
+    { id: "sample-hunza", title: SAMPLE_PACKAGE_TITLE, description: "Forts, glacial water and upper-Hunza horizons in one unhurried journey.", minDays: 5, maxDays: 8, vendor: { businessName: "Northbound Expeditions — Sample", verified: true }, tiers: fallbackTiers, stops: [{ dayNumber: 1, stopType: "overnight", destination: find("hunza-valley") }, { dayNumber: 3, stopType: "viewpoint", destination: find("attabad-lake") }, { dayNumber: 5, stopType: "viewpoint", destination: find("passu-cones") }] },
     { id: "sample-deosai", title: "Skardu to Deosai — Sample", description: "A high-plateau escape with a required local 4x4 day-hire shown separately.", minDays: 4, maxDays: 6, vendor: { businessName: "Northbound Expeditions — Sample", verified: true }, tiers: fallbackTiers, stops: [{ dayNumber: 1, stopType: "overnight", destination: find("skardu") }, { dayNumber: 3, stopType: "viewpoint", destination: find("deosai-sheosar-lake") }] },
     { id: "sample-neelum", title: "Upper Neelum — Sample", description: "A green-valley route from Muzaffarabad to Kel and Arang Kel.", minDays: 4, maxDays: 7, vendor: { businessName: "Northbound Expeditions — Sample", verified: true }, tiers: fallbackTiers, stops: [{ dayNumber: 1, stopType: "overnight", destination: find("neelum-valley") }, { dayNumber: 4, stopType: "viewpoint", destination: find("arang-kel") }] },
   ];
