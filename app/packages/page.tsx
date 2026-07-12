@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ArrowRight, Filter, Route } from "lucide-react";
-import { InnerHeader } from "@/components/inner-header";
+import { InnerHeaderShell } from "@/components/inner-header-shell";
 import { SiteFooter } from "@/components/site-footer";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -26,7 +26,7 @@ export default async function PackagesPage({ searchParams }: { searchParams: Pro
   );
   return (
     <>
-      <InnerHeader />
+      <InnerHeaderShell />
       <main>
         <section className="bg-[#13382f] py-20 text-white"><div className="container-shell"><p className="eyebrow text-accent">Verified operators only</p><h1 className="display-title mt-3 text-6xl md:text-8xl">Trips with the details intact.</h1><p className="mt-5 max-w-2xl text-lg leading-8 text-white/65">Compare duration, tier pricing and transport requirements before booking is ever part of the conversation.</p></div></section>
         <section className="section-pad"><div className="container-shell grid gap-8 lg:grid-cols-[280px_1fr]">

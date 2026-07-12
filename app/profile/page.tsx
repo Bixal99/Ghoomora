@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { ArrowRight, Clock3, ShieldCheck, Store } from "lucide-react";
 import { ApplicationStatus, Role } from "@prisma/client";
 import { submitVendorApplication } from "@/app/actions/application";
-import { InnerHeader } from "@/components/inner-header";
+import { InnerHeaderShell } from "@/components/inner-header-shell";
 import { SiteFooter } from "@/components/site-footer";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -23,7 +23,7 @@ const VENDOR_TYPES = ["TRANSPORT", "HOTEL", "GUIDE", "CAMP"] as const;
 
 function ApplicationForm({ heading, note }: { heading: string; note?: string }) {
   return (
-    <Card className="mt-6 p-7">
+    <Card id="vendor-application" className="mt-6 p-7 scroll-mt-28">
       <div className="flex items-center gap-2">
         <Store className="text-[#397668]" size={20} />
         <h2 className="text-xl font-extrabold">{heading}</h2>
@@ -92,7 +92,7 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
 
   return (
     <>
-      <InnerHeader />
+      <InnerHeaderShell />
       <main className="section-pad min-h-screen bg-[#e5eee9]">
         <div className="container-shell max-w-3xl">
           <p className="eyebrow text-[#5a7f73]">Traveler profile</p>

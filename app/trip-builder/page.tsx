@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ArrowRight, SlidersHorizontal, Sparkles } from "lucide-react";
-import { InnerHeader } from "@/components/inner-header";
+import { InnerHeaderShell } from "@/components/inner-header-shell";
 import { SiteFooter } from "@/components/site-footer";
 import { AiTripAssistant } from "@/components/ai-trip-assistant";
 import { Button } from "@/components/ui/button";
@@ -23,7 +23,7 @@ export default async function TripBuilder({ searchParams }: { searchParams: Prom
   const packages = (await getPackages()).filter((pkg) => (!region || pkg.stops.some((stop) => stop.destination.region.slug === region)) && (!tier || pkg.tiers.some((item) => item.tier === tier)) && days >= pkg.minDays && days <= pkg.maxDays);
   return (
     <>
-      <InnerHeader />
+      <InnerHeaderShell />
       <main className="min-h-screen bg-[#e5eee9] py-16"><div className="container-shell"><div className="mx-auto max-w-3xl text-center"><p className="eyebrow text-[#5a7f73]">No AI guesswork</p><h1 className="display-title mt-3 text-6xl md:text-8xl">Build around what matters.</h1><p className="mt-5 leading-8 text-muted-foreground">Choose your practical constraints. Ghoomora will match them against complete, verified package structures.</p></div>
         <Card className="mx-auto mt-12 max-w-5xl p-7 md:p-9"><form className="grid gap-5 md:grid-cols-3"><label className="text-sm font-bold">Region<select name="region" defaultValue={region} className="focus-ring mt-2 h-12 w-full rounded-xl border bg-white px-3" required><option value="">Choose region</option>{regions.map((item) => <option key={item.slug} value={item.slug}>{item.name}</option>)}</select></label><label className="text-sm font-bold">Preferred tier<select name="tier" defaultValue={tier} className="focus-ring mt-2 h-12 w-full rounded-xl border bg-white px-3"><option value="">Any tier</option><option>STANDARD</option><option>MODERATE</option><option>LUXURY</option></select></label><label className="text-sm font-bold">Pickup city<select name="pickup" defaultValue={pickup} className="focus-ring mt-2 h-12 w-full rounded-xl border bg-white px-3">{cities.map((item) => <option key={item.id} value={item.slug}>{item.name}</option>)}</select></label><label className="text-sm font-bold">Days<input name="days" defaultValue={days} type="number" min={2} max={30} className="focus-ring mt-2 h-12 w-full rounded-xl border bg-white px-3" /></label><label className="text-sm font-bold">Travelers<input name="travelers" defaultValue={travelers} type="number" min={1} max={30} className="focus-ring mt-2 h-12 w-full rounded-xl border bg-white px-3" /></label><label className="text-sm font-bold">Earliest departure<input name="date" defaultValue={date} type="date" className="focus-ring mt-2 h-12 w-full rounded-xl border bg-white px-3" /></label><Button size="lg" className="md:col-span-3"><SlidersHorizontal size={18} /> Find matching trips</Button></form></Card>
         <AiTripAssistant regionSlug={region || undefined} />

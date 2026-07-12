@@ -3,7 +3,7 @@ import { Download, Star } from "lucide-react";
 import { cancelBooking, updateBookingStatus } from "@/app/actions/booking";
 import { createReview } from "@/app/actions/review";
 import { LiveTrackingMap } from "@/components/live-tracking";
-import { InnerHeader } from "@/components/inner-header";
+import { InnerHeaderShell } from "@/components/inner-header-shell";
 import { SiteFooter } from "@/components/site-footer";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -37,9 +37,12 @@ export default async function BookingPage({ params }: { params: Promise<{ id: st
   const isAdmin = actor.role === Role.ADMIN;
   if (!isOwner && !isVendor && !isAdmin) notFound();
 
+  const voucherStatuses: BookingStatus[] = [BookingStatus.CONFIRMED, BookingStatus.IN_PROGRESS, BookingStatus.COMPLETED];
+  const canDownloadVoucher = voucherStatuses.includes(booking.status);
+
   return (
     <>
-      <InnerHeader />
+      <InnerHeaderShell />
       <main className="section-pad min-h-screen bg-[#e5eee9]">
         <div className="container-shell max-w-4xl">
           <Badge>{booking.status}</Badge>
@@ -48,11 +51,15 @@ export default async function BookingPage({ params }: { params: Promise<{ id: st
           <Card className="mt-8 p-7">
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div><p className="text-sm text-muted-foreground">Total paid estimate</p><p className="text-3xl font-extrabold">{formatPKR(booking.totalPrice)}</p></div>
-              <Button asChild variant="outline">
-                <a href={"/api/bookings/" + booking.id + "/voucher"}>
-                  <Download size={16} /> Download e-voucher
-                </a>
-              </Button>
+              {canDownloadVoucher ? (
+                <Button asChild variant="outline">
+                  <a href={"/api/bookings/" + booking.id + "/voucher"}>
+                    <Download size={16} /> Download e-voucher
+                  </a>
+                </Button>
+              ) : isOwner ? (
+                <p className="text-sm text-muted-foreground">Your e-voucher will be available once this booking is confirmed.</p>
+              ) : null}
             </div>
             <div className="mt-6 grid gap-2 text-sm"><p>Pickup: {booking.pickupCity.name}</p><p>Tier: {booking.tier.tier}</p><p>Operator: {booking.package.vendor.businessName}</p></div>
           </Card>
@@ -72,6 +79,12 @@ export default async function BookingPage({ params }: { params: Promise<{ id: st
           )}
           {isOwner && booking.status === BookingStatus.PENDING && (
             <form action={cancelBooking} className="mt-6"><input type="hidden" name="bookingId" value={booking.id} /><Button variant="outline">Cancel booking</Button></form>
+          )}
+          {isOwner && booking.status !== BookingStatus.COMPLETED && !booking.review && booking.status !== BookingStatus.CANCELLED && (
+            <Card className="mt-6 p-7">
+              <h2 className="flex items-center gap-2 text-xl font-extrabold"><Star size={18} /> Reviews</h2>
+              <p className="mt-2 text-sm text-muted-foreground">You can leave a review after your trip is marked completed.</p>
+            </Card>
           )}
           {isOwner && booking.status === BookingStatus.COMPLETED && !booking.review && (
             <Card className="mt-6 p-7">

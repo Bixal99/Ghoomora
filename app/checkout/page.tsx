@@ -1,5 +1,5 @@
 import { notFound, redirect } from "next/navigation";
-import { InnerHeader } from "@/components/inner-header";
+import { InnerHeaderShell } from "@/components/inner-header-shell";
 import { CheckoutForm } from "@/components/checkout-form";
 import { SiteFooter } from "@/components/site-footer";
 import { getActor } from "@/lib/auth";
@@ -24,7 +24,7 @@ export default async function CheckoutPage({ searchParams }: { searchParams: Pro
 
   return (
     <>
-      <InnerHeader />
+      <InnerHeaderShell />
       <main className="section-pad bg-[#e5eee9] min-h-screen">
         <div className="container-shell">
           <p className="eyebrow text-[#5a7f73]">Secure checkout</p>

@@ -2,26 +2,48 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BarChart3, BedDouble, BusFront, LayoutDashboard, MountainSnow, Package, ShieldCheck, TentTree, UserRound } from "lucide-react";
+import {
+  BarChart3,
+  BedDouble,
+  BusFront,
+  CalendarCheck,
+  LayoutDashboard,
+  MountainSnow,
+  Package,
+  ShieldCheck,
+  TentTree,
+  UserRound,
+} from "lucide-react";
+import type { VendorType } from "@prisma/client";
 import type { ReactNode } from "react";
+import { getPortalNav } from "@/lib/navigation";
 
-const links = [
-  { href: "/dashboard", label: "Overview", icon: LayoutDashboard },
-  { href: "/fleet", label: "Fleet & fares", icon: BusFront },
-  { href: "/hotels", label: "Hotels", icon: BedDouble },
-  { href: "/guide-profile", label: "Guide profile", icon: UserRound },
-  { href: "/camps", label: "Camps", icon: TentTree },
-  { href: "/vendor/packages", label: "Packages", icon: Package },
-];
+const ICONS = {
+  overview: LayoutDashboard,
+  fleet: BusFront,
+  hotels: BedDouble,
+  guide: UserRound,
+  camps: TentTree,
+  packages: Package,
+  bookings: CalendarCheck,
+  approvals: ShieldCheck,
+  analytics: BarChart3,
+} as const;
 
-export function PortalShell({ children, admin = false }: { children: ReactNode; admin?: boolean }) {
+export function PortalShell({
+  children,
+  admin = false,
+  vendorTypes = [],
+}: {
+  children: ReactNode;
+  admin?: boolean;
+  vendorTypes?: VendorType[];
+}) {
   const pathname = usePathname();
-  const nav = admin
-    ? [
-        { href: "/approvals", label: "Approvals", icon: ShieldCheck },
-        { href: "/analytics", label: "Analytics", icon: BarChart3 },
-      ]
-    : links;
+  const nav = getPortalNav(vendorTypes, admin).map((item) => ({
+    ...item,
+    icon: ICONS[item.iconKey as keyof typeof ICONS] ?? LayoutDashboard,
+  }));
 
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_100%_0%,rgba(240,179,87,.10),transparent_24rem),#eef1eb]">

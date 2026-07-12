@@ -2,11 +2,12 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { signIn } from "next-auth/react";
+import { signIn, getSession } from "next-auth/react";
 import { useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/auth/password-input";
+import { resolvePostLoginRedirect } from "@/lib/navigation";
 import { signInSchema } from "@/lib/validation";
 
 export function SignInForm({ redirectTo, signUpHref }: { redirectTo: string; signUpHref: string }) {
@@ -45,7 +46,9 @@ export function SignInForm({ redirectTo, signUpHref }: { redirectTo: string; sig
       return;
     }
 
-    router.push(redirectTo);
+    const session = await getSession();
+    const destination = resolvePostLoginRedirect(redirectTo, session?.user?.role);
+    router.push(destination);
     router.refresh();
   }
 

@@ -13,7 +13,7 @@ export default async function AnalyticsPage() {
   const data = await getAnalyticsSnapshot();
   if (!data) notFound();
   return (
-    <PortalShell>
+    <PortalShell admin>
       <p className="eyebrow text-[#5a7f73]">Admin intelligence</p>
       <h1 className="display-title mt-2 text-6xl">Platform analytics</h1>
       <div className="mt-8"><AnalyticsDashboard data={data} /></div>

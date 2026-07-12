@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { BookingStatus } from "@prisma/client";
 import { getDb } from "@/lib/db";
 import { resolveBookingPrice } from "@/lib/pricing";
 import { renderVoucherPdf } from "@/lib/voucher-pdf";
@@ -14,6 +15,10 @@ export async function GET(_request: Request, context: { params: Promise<{ id: st
     include: { pickupCity: true, tier: true, travelers: true, package: { include: { vendor: true } } },
   });
   if (!booking || booking.customerId !== actor.id) notFound();
+  const voucherStatuses: BookingStatus[] = [BookingStatus.CONFIRMED, BookingStatus.IN_PROGRESS, BookingStatus.COMPLETED];
+  if (!voucherStatuses.includes(booking.status)) {
+    return new Response("Voucher not available for this booking status", { status: 403 });
+  }
   const price = await resolveBookingPrice({
     packageId: booking.packageId,
     tierId: booking.tierId,

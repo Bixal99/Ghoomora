@@ -17,7 +17,8 @@ export default auth((req) => {
   const signedIn = Boolean(session?.user);
 
   if (signedIn && matches(pathname, AUTH_PAGES)) {
-    return NextResponse.redirect(new URL("/", req.nextUrl));
+    const home = role === "ADMIN" ? "/approvals" : role === "VENDOR" ? "/dashboard" : "/";
+    return NextResponse.redirect(new URL(home, req.nextUrl));
   }
 
   if (matches(pathname, ADMIN_PATHS)) {

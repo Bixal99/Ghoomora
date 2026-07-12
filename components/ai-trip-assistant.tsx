@@ -77,9 +77,13 @@ export function AiTripAssistant({ regionSlug }: { regionSlug?: string }) {
   }
 
   return (
-    <Card className="mx-auto mt-10 max-w-5xl p-7">
-      <div className="flex items-center gap-2"><Sparkles className="text-[#397668]" /><h2 className="text-xl font-extrabold">AI-assisted planning</h2></div>
-      <p className="mt-2 text-sm text-muted-foreground">Suggestions use only destinations already in Ghoomora. Always verify routes and operators locally.</p>
+    <details className="mx-auto mt-10 max-w-5xl rounded-[2rem] border border-primary/10 bg-white open:shadow-lg">
+      <summary className="cursor-pointer list-none p-7 font-extrabold marker:content-none [&::-webkit-details-marker]:hidden">
+        <span className="inline-flex items-center gap-2"><Sparkles className="text-[#397668]" /> Get AI suggestions (optional)</span>
+      </summary>
+      <Card className="border-0 shadow-none">
+        <div className="px-7 pb-7">
+      <p className="text-sm text-muted-foreground">Suggestions use only destinations already in Ghoomora. Always verify routes and operators locally.</p>
       <div className="mt-5 grid gap-4 md:grid-cols-3">
         <label className="text-sm font-bold">
           Budget (PKR)
@@ -100,6 +104,8 @@ export function AiTripAssistant({ regionSlug }: { regionSlug?: string }) {
       {stops.length > 0 && <ol className="mt-6 space-y-2 text-sm">{stops.map((stop) => <li key={stop.dayNumber} className="rounded-xl bg-muted p-3"><strong>Day {stop.dayNumber}:</strong> {stop.destinationName} · {stop.stopType}{stop.note ? " — " + stop.note : ""}</li>)}</ol>}
       {planned && !error && stops.length === 0 && <p className="mt-6 text-sm text-muted-foreground">No itinerary could be built for those inputs. Try widening the days or interests.</p>}
       {estimate && <p className="mt-6 text-sm"><strong>Estimated total:</strong> {formatPKR(estimate.total)}. {estimate.disclaimer}</p>}
-    </Card>
+        </div>
+      </Card>
+    </details>
   );
 }

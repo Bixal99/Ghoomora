@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { signOut, useSession } from "next-auth/react";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
-import { LayoutDashboard, LogOut, ShieldCheck, UserRound } from "lucide-react";
+import { LogOut, UserRound } from "lucide-react";
+import { getAccountMenuLinks, type NavLink } from "@/lib/navigation";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -18,22 +19,58 @@ function initials(name?: string | null, email?: string | null) {
   return email?.[0]?.toUpperCase() ?? "?";
 }
 
-export function UserAccountMenu({ variant = "hero" }: { variant?: Variant }) {
+export function UserAccountMenu({
+  variant = "hero",
+  menuLinks,
+  mobile = false,
+}: {
+  variant?: Variant;
+  menuLinks?: NavLink[];
+  mobile?: boolean;
+}) {
   const { data: session, status } = useSession();
   const user = session?.user;
-  const role = user?.role;
+  const links = menuLinks ?? getAccountMenuLinks(user?.role);
 
   if (status === "loading") {
     return <span className={cn("block size-10 rounded-full", variant === "hero" ? "bg-white/15" : "bg-primary/10")} aria-hidden />;
   }
 
   if (status !== "authenticated" || !user) {
+    if (mobile) {
+      return (
+        <div className="flex items-center gap-2">
+          <Button asChild size="sm" variant="outline" className="flex-1">
+            <Link href="/sign-in">Sign in</Link>
+          </Button>
+          <Button asChild size="sm" variant="accent" className="flex-1">
+            <Link href="/sign-up">Sign up</Link>
+          </Button>
+        </div>
+      );
+    }
+
     return (
       <div className="flex items-center gap-2">
         <Button asChild variant={variant === "hero" ? "ghost" : "outline"} size="sm" className={variant === "hero" ? "text-white hover:bg-white/10" : undefined}>
           <Link href="/sign-in">Sign in</Link>
         </Button>
         <Button asChild variant="accent" size="sm"><Link href="/sign-up">Sign up</Link></Button>
+      </div>
+    );
+  }
+
+  if (mobile) {
+    return (
+      <div className="grid gap-1">
+        {links.map((link) => (
+          <Link key={link.href} className="flex items-center gap-2 rounded-xl p-3 font-bold hover:bg-muted" href={link.href}>
+            <UserRound size={16} /> {link.label}
+          </Link>
+        ))}
+        <Button type="button" size="sm" variant="outline" onClick={() => signOut({ redirectTo: "/" })}>
+          <LogOut size={15} /> Sign out
+        </Button>
       </div>
     );
   }
@@ -70,25 +107,13 @@ export function UserAccountMenu({ variant = "hero" }: { variant?: Variant }) {
             {user.email && <p className="truncate text-xs text-muted-foreground">{user.email}</p>}
           </div>
           <div className="my-1 h-px bg-primary/10" />
-          <DropdownMenu.Item asChild>
-            <Link href="/profile" className="flex cursor-pointer items-center gap-2 rounded-xl px-3 py-2.5 text-sm font-bold outline-none focus:bg-muted">
-              <UserRound size={16} /> Profile
-            </Link>
-          </DropdownMenu.Item>
-          {(role === "VENDOR" || role === "ADMIN") && (
-            <DropdownMenu.Item asChild>
-              <Link href="/dashboard" className="flex cursor-pointer items-center gap-2 rounded-xl px-3 py-2.5 text-sm font-bold outline-none focus:bg-muted">
-                <LayoutDashboard size={16} /> Dashboard
+          {links.map((link) => (
+            <DropdownMenu.Item key={link.href} asChild>
+              <Link href={link.href} className="flex cursor-pointer items-center gap-2 rounded-xl px-3 py-2.5 text-sm font-bold outline-none focus:bg-muted">
+                <UserRound size={16} /> {link.label}
               </Link>
             </DropdownMenu.Item>
-          )}
-          {role === "ADMIN" && (
-            <DropdownMenu.Item asChild>
-              <Link href="/approvals" className="flex cursor-pointer items-center gap-2 rounded-xl px-3 py-2.5 text-sm font-bold outline-none focus:bg-muted">
-                <ShieldCheck size={16} /> Approvals
-              </Link>
-            </DropdownMenu.Item>
-          )}
+          ))}
           <div className="my-1 h-px bg-primary/10" />
           <DropdownMenu.Item
             onSelect={() => signOut({ redirectTo: "/" })}

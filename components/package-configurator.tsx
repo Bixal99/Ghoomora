@@ -44,6 +44,7 @@ export function PackageConfigurator({ pkg, cities }: { pkg: PackageView; cities:
   }, [days, travelers, tierId, pickupCity, pkg, roughStops]);
 
   const estimate = resolved;
+  const showBreakdown = Boolean(tierId && pickupCity && days >= pkg.minDays && travelers >= 1 && estimate && !pending);
 
   if (!tier || !estimate) return <Card className="p-6">This package does not have a complete tier configuration.</Card>;
 
@@ -64,13 +65,21 @@ export function PackageConfigurator({ pkg, cities }: { pkg: PackageView; cities:
         <label className="block text-sm font-bold">Days: <span className="text-[#397668]">{days}</span><input className="mt-3 w-full accent-[#173f35]" type="range" min={pkg.minDays} max={pkg.maxDays} value={days} onChange={(event) => setDays(Number(event.target.value))} /></label>
         <div className="rounded-2xl bg-muted p-5 text-sm">
           {pending && <p className="mb-3 text-xs text-muted-foreground">Updating live fares…</p>}
-          <Line label={tier.transportMode === "SHARED" ? "Pickup fare (all seats)" : "Pickup vehicle fare"} value={estimate.pickupFare} />
-          <Line label="Stay & tier inclusions" value={estimate.stayAndExtras} />
-          {roughStops.length > 0 && <Line label={tier.tier === "LUXURY" ? "Local 4x4 (bundled)" : "Local 4x4 day-hire"} value={estimate.localTransport} />}
-          <div className="my-4 border-t" />
-          <div className="flex items-center justify-between"><strong>Estimated total</strong><strong className="text-xl">{formatPKR(estimate.total)}</strong></div>
-          {estimate.usingDemo && <p className="mt-3 text-xs text-[#8a5d1d]">Using demo fares — connect database and verified vendor inventory for live pricing.</p>}
-          {estimate.missingLocalHire.length > 0 && tier.tier !== "LUXURY" && <p className="mt-3 text-xs font-bold text-[#8a5d1d]">Missing local hire rates for: {estimate.missingLocalHire.join(", ")}</p>}
+          {!showBreakdown ? (
+            <p className="text-muted-foreground">Select tier, pickup city, trip length, and travelers to see your itemized estimate.</p>
+          ) : (
+            <>
+              <Line label={tier.transportMode === "SHARED" ? "Pickup fare (all seats)" : "Pickup vehicle fare"} value={estimate.pickupFare} />
+              <Line label="Stay & tier inclusions" value={estimate.stayAndExtras} />
+              {roughStops.length > 0 && estimate.localTransport > 0 && (
+                <Line label={tier.tier === "LUXURY" ? "Local 4x4 (bundled)" : "Local 4x4 day-hire"} value={estimate.localTransport} />
+              )}
+              <div className="my-4 border-t" />
+              <div className="flex items-center justify-between"><strong>Estimated total</strong><strong className="text-xl">{formatPKR(estimate.total)}</strong></div>
+            </>
+          )}
+          {showBreakdown && estimate.usingDemo && <p className="mt-3 text-xs text-[#8a5d1d]">Using demo fares — connect database and verified vendor inventory for live pricing.</p>}
+          {showBreakdown && estimate.missingLocalHire.length > 0 && tier.tier !== "LUXURY" && <p className="mt-3 text-xs font-bold text-[#8a5d1d]">Missing local hire rates for: {estimate.missingLocalHire.join(", ")}</p>}
         </div>
         <div className="flex items-start gap-2 text-xs leading-5 text-muted-foreground"><Info size={15} className="mt-0.5 shrink-0" />Prices itemize pickup, stay, and local 4x4 separately per Ghoomora&apos;s transport model.</div>
         {estimate.canCheckout ? (
