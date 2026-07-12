@@ -323,7 +323,9 @@ model SafetyPoint {
 }
 ```
 
-## Destination Data — seed exactly these for Phase 1
+## Destination Data — Phase 1 reference list
+
+Insert these as real `Region` / `Destination` rows via Prisma Studio (see `docs/ADDING_REAL_DATA.md`). Do not invent coordinates.
 
 Every destination-facing query must join through `Region` — never hardcode a destination list in a component. Coordinates/elevations below are approximate reference values; Naltar, Saiful Malook, Chocolate Rocks, Ratti Gali, and Sheosar Lake were verified against current sources, the Neelum Valley chain (Kel, Arang Kel, Taobat, Shounter) are rougher estimates and need a map check before production.
 
@@ -400,9 +402,9 @@ Every destination-facing query must join through `Region` — never hardcode a d
 | Pir Chinasi | 34.4200 | 73.4667 | 2,900 |
 | Muzaffarabad | 34.3700 | 73.4711 | 702 |
 
-### Extended network — additional valleys to seed after the above
+### Extended network — additional valleys to add after the above
 
-Sourced from the *Tourist Guide Map — Northern Pakistan (Travel Times from HMC Tours)*, a schematic transit-style map (relative connections and times, not to scale). Names only — geocode each before seeding, do not invent coordinates. Double-check spelling against a second source (a few labels on the source map are close variants of each other, e.g. "Kandol" vs a similar-looking nearby label, "Batakundi" vs "Battakundi"), and drop anything that's really a road junction rather than a destination worth its own page.
+Sourced from the *Tourist Guide Map — Northern Pakistan (Travel Times from HMC Tours)*, a schematic transit-style map (relative connections and times, not to scale). Names only — geocode each before inserting via Prisma Studio, do not invent coordinates. Double-check spelling against a second source (a few labels on the source map are close variants of each other, e.g. "Kandol" vs a similar-looking nearby label, "Batakundi" vs "Battakundi"), and drop anything that's really a road junction rather than a destination worth its own page.
 
 | Region | Key stops |
 |---|---|
@@ -426,7 +428,7 @@ Sourced from the *Tourist Guide Map — Northern Pakistan (Travel Times from HMC
 
 ## Build Order — follow this sequence, do not skip ahead
 
-**Phase 1 — Foundation.** Schema + seed (all destination data above, plus pickup cities and `requiresLocalTransport` flags), auth/roles, base layouts. Do not start Phase 3 UI before this is fully done — the map and route engine depend on real coordinates existing in the DB.
+**Phase 1 — Foundation.** Schema + real catalog rows (destination data above, plus pickup cities and `requiresLocalTransport` flags — added via Prisma Studio / migrations, not a seed script), auth/roles, base layouts. Do not start Phase 3 UI before this is fully done — the map and route engine depend on real coordinates existing in the DB.
 
 **Phase 2 — Vendor & packages.** Vendor onboarding for all 4 typed profiles (Transport, Hotel, Guide, Camp), including pickup-leg fares (by pickup city) and local day-hire rates (by destination) for transport vendors. Package CRUD with the 3-tier + day-range model.
 
@@ -478,7 +480,7 @@ ghoomora/
 │   └── ai.ts
 ├── prisma/
 │   ├── schema.prisma
-│   └── seed.ts
+│   └── schema.prisma / migrations/
 └── public/
 ```
 

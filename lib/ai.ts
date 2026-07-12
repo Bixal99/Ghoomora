@@ -1,6 +1,6 @@
 import "server-only";
 import Groq from "groq-sdk";
-import { getRegions } from "@/lib/data";
+import { loadRegions } from "@/lib/data";
 
 function client() {
   const apiKey = process.env.GROQ_API_KEY;
@@ -22,7 +22,9 @@ function demoItinerary(destinations: DestinationOption[], days: number, note: st
 }
 
 export async function suggestItinerary(input: { budget: number; days: number; interests: string; regionSlug?: string }) {
-  const regions = await getRegions();
+  const catalog = await loadRegions();
+  if (catalog.status === "setup") return [] as ItineraryStop[];
+  const regions = catalog.data;
   const destinations: DestinationOption[] = regions
     .filter((region) => !input.regionSlug || region.slug === input.regionSlug)
     .flatMap((region) => region.destinations.map((destination) => ({ name: destination.name, slug: destination.slug, region: region.name, difficulty: destination.difficulty, requiresLocalTransport: destination.requiresLocalTransport })));

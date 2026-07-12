@@ -28,7 +28,7 @@ export function AccessPanel({ redirectTo = "/dashboard", needsOnboarding = false
       <Card className="max-w-lg p-9 text-center">
         <span className="mx-auto grid size-14 place-items-center rounded-full bg-muted"><KeyRound /></span>
         <h1 className="display-title mt-5 text-4xl">{configured ? "Sign-in required" : "Connect your database"}</h1>
-        <p className="mt-4 text-sm leading-7 text-muted-foreground">{configured ? "Sign in or create an account to continue. Vendor access is granted after an admin approves your application." : "The public MVP is running in demo mode. Add the environment values from .env.example, run the migration and seed to enable protected workflows."}</p>
+        <p className="mt-4 text-sm leading-7 text-muted-foreground">{configured ? "Sign in or create an account to continue. Vendor access is granted after an admin approves your application." : "Protected workflows need a configured database and Auth.js secrets. Add the values from .env.example, run npm run db:migrate, then npm run admin:create."}</p>
         {configured ? (
           <div className="mt-6 flex flex-wrap justify-center gap-3">
             <Button asChild><Link href={signInHref}>Sign in</Link></Button>

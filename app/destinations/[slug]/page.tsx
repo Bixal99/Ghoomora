@@ -8,16 +8,38 @@ import { WeatherForecastPanel } from "@/components/weather-forecast";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { getDestination, getPackagesForDestination } from "@/lib/data";
+import { getDestination, getPackagesForDestination, isCatalogSetupError } from "@/lib/data";
+import { CatalogSetupPanel } from "@/components/catalog-setup-panel";
 import { getWeatherForecast } from "@/lib/weather";
 
 export const dynamic = "force-dynamic";
 const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
 export default async function DestinationPage({ params }: { params: Promise<{ slug: string }> }) {
-  const destination = await getDestination((await params).slug);
+  let destination;
+  try {
+    destination = await getDestination((await params).slug);
+  } catch (error) {
+    if (isCatalogSetupError(error)) {
+      return (
+        <>
+          <InnerHeaderShell />
+          <main><CatalogSetupPanel /></main>
+          <SiteFooter />
+        </>
+      );
+    }
+    throw error;
+  }
   if (!destination) notFound();
-  const [related, forecast] = await Promise.all([getPackagesForDestination(destination.slug), getWeatherForecast(destination)]);
+  let related: Awaited<ReturnType<typeof getPackagesForDestination>> = [];
+  try {
+    related = await getPackagesForDestination(destination.slug);
+  } catch (error) {
+    if (isCatalogSetupError(error)) related = [];
+    else throw error;
+  }
+  const forecast = await getWeatherForecast(destination);
   return (
     <>
       <InnerHeaderShell />

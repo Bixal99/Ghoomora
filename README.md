@@ -169,10 +169,10 @@ Create an empty database in pgAdmin (or `createdb`), then point `DATABASE_URL` a
 
 ```powershell
 npm run db:migrate
-npm run db:seed
+npm run admin:create
 ```
 
-This creates the schema, the single admin account (from `ADMIN_EMAIL` / `ADMIN_PASSWORD`), and seeds regions, destinations, and pickup cities. No fake vendors, packages, or fares.
+This applies the schema and creates the single admin account from `ADMIN_EMAIL` / `ADMIN_PASSWORD` (idempotent). Regions, destinations, and pickup cities are **not** auto-created — add them via Prisma Studio as described in [`docs/ADDING_REAL_DATA.md`](docs/ADDING_REAL_DATA.md).
 
 ### 4. Authentication
 
@@ -190,7 +190,7 @@ npm run dev
 
 Open **[http://localhost:3000](http://localhost:3000)**.
 
-Without full credentials, public routes run in **sample-data mode**. Protected partner and admin pages show setup guidance instead of failing silently.
+Without a configured database, public catalog pages show setup guidance. When the database is connected but empty, they show an empty state. Protected partner and admin pages show setup guidance until Auth.js and the database are ready.
 
 ---
 
@@ -248,7 +248,7 @@ Without full credentials, public routes run in **sample-data mode**. Protected p
 
 ## For admins
 
-1. Set `ADMIN_EMAIL` and `ADMIN_PASSWORD` in `.env`, then run `npm run db:seed`. This creates exactly one admin account if none exists. There is no admin sign-up path in the app.
+1. Set `ADMIN_EMAIL` and `ADMIN_PASSWORD` in `.env`, then run `npm run admin:create`. This creates exactly one admin account if none exists. There is no admin sign-up path in the app.
 2. Sign in at `/sign-in` with that account.
 3. Open **`/approvals`** to see each pending vendor application in full (business name, phone, CNIC, description, requested services, and any document).
 4. **Approve** to create the vendor profile and grant `VENDOR` access in a single transaction, or **Reject** with an optional note the applicant can see.
@@ -268,7 +268,7 @@ Approval — not sign-up — is what promotes a user to `VENDOR`. Verification c
 | `npm test` | Vitest unit tests |
 | `npm run lint` | ESLint |
 | `npm run db:migrate` | Apply Prisma migrations |
-| `npm run db:seed` | Seed admin, regions, destinations, pickup cities |
+| `npm run admin:create` | Create the bootstrap admin account from `ADMIN_*` env |
 | `npm run db:generate` | Regenerate Prisma client |
 
 ---
@@ -304,7 +304,7 @@ components/
 
 lib/                        # Data, pricing, auth, AI, weather, Overpass
 auth.ts / auth.config.ts    # Auth.js configuration (adapter, providers, sessions)
-prisma/                     # Schema, migrations, seed data
+prisma/                     # Schema and migrations
 proxy.ts                    # Auth.js role-based middleware (Next.js 16)
 ```
 
@@ -325,7 +325,7 @@ Overpass amenity lookups degrade gracefully when public mirrors are slow or unav
 The trip planner only references destinations already in Ghoomora's database. Set `GROQ_API_KEY` for live AI; otherwise demo suggestions are returned.
 
 **Geocoding**
-See [`docs/GEOCODING_BACKLOG.md`](docs/GEOCODING_BACKLOG.md) before adding destinations outside the seeded coordinate network.
+See [`docs/GEOCODING_BACKLOG.md`](docs/GEOCODING_BACKLOG.md) and [`docs/ADDING_REAL_DATA.md`](docs/ADDING_REAL_DATA.md) before adding destinations.
 
 ---
 

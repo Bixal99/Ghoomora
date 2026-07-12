@@ -10,17 +10,21 @@ import { DestinationCard } from "@/components/destination-card";
 import { Reveal } from "@/components/reveal";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { getRegions } from "@/lib/data";
 import { getActor } from "@/lib/auth";
+import { loadRegions } from "@/lib/data";
+import { CatalogSetupPanel } from "@/components/catalog-setup-panel";
+import { EmptyState } from "@/components/empty-state";
 import { Role } from "@prisma/client";
 
 export const dynamic = "force-dynamic";
 
 export default async function Home() {
-  const regions = await getRegions();
+  const catalog = await loadRegions();
   const actor = await getActor();
   const showPartnerCta = actor?.role === Role.VENDOR || actor?.role === Role.ADMIN;
+  const regions = catalog.status === "ready" ? catalog.data : [];
   const featured = regions.flatMap((region) => region.destinations).filter((item) => ["hunza-valley", "deosai-sheosar-lake", "saif-ul-malook-lake"].includes(item.slug));
+  const destinationCount = regions.flatMap((item) => item.destinations).length;
   return (
     <>
       <WelcomeToast />
@@ -33,7 +37,7 @@ export default async function Home() {
             <h1 className="display-title text-[clamp(3.35rem,9.2vw,7.75rem)] leading-[.82]">Go beyond<br /><GradientText className="italic">the postcard.</GradientText></h1>
             <p className="mt-8 max-w-xl text-base leading-8 text-white/78 md:text-lg">Discover mountain regions, compare transparent trip tiers and plan with local operators—without losing the practical details that matter on the road.</p>
             <HomeHeroCta />
-            <div className="mt-10 flex flex-wrap gap-7 text-sm text-white/65"><span><strong className="text-white">{regions.length}</strong> mountain regions</span><span><strong className="text-white">{regions.flatMap((item) => item.destinations).length}</strong> verified coordinates</span><span><strong className="text-white">2-layer</strong> transport pricing</span></div>
+            <div className="mt-10 flex flex-wrap gap-7 text-sm text-white/65"><span><strong className="text-white">{regions.length}</strong> mountain regions</span><span><strong className="text-white">{destinationCount}</strong> verified coordinates</span><span><strong className="text-white">2-layer</strong> transport pricing</span></div>
           </div>
         </div>
         <div className="absolute bottom-6 right-6 z-20 hidden rounded-2xl border border-white/15 bg-[#0b2821]/45 p-5 shadow-2xl backdrop-blur-xl lg:block"><p className="eyebrow text-accent">Built for real roads</p><p className="mt-2 max-w-[220px] text-sm text-white/70">Pickup travel and local 4x4 hire stay separate, so estimates remain clear.</p></div>
@@ -43,23 +47,37 @@ export default async function Home() {
         <section className="section-pad">
           <div className="container-shell">
             <Reveal className="grid gap-8 lg:grid-cols-[.75fr_1.25fr] lg:items-end">
-              <div><p className="eyebrow text-[#5a7f73]">Start with a region</p><h2 className="display-title mt-3 text-5xl leading-none md:text-7xl">Three landscapes.<br />Countless ways in.</h2></div>
+              <div><p className="eyebrow text-[#5a7f73]">Start with a region</p><h2 className="display-title mt-3 text-5xl leading-none md:text-7xl">Landscapes worth<br />planning around.</h2></div>
               <p className="max-w-xl text-base leading-8 text-muted-foreground lg:justify-self-end">Every destination belongs to a real region in Ghoomora’s database. Browse by geography first, then narrow by season, altitude, trip length and comfort.</p>
             </Reveal>
-            <div className="mt-12 grid gap-5 md:grid-cols-3">
-              {regions.map((region, index) => (
-                <Reveal key={region.slug}><Link href={"/regions/" + region.slug} className="focus-ring group block min-h-72 overflow-hidden rounded-[2rem] border border-white/10 bg-primary p-7 text-white shadow-[0_20px_55px_rgba(16,40,32,.13)] transition duration-300 hover:-translate-y-1.5 hover:shadow-[0_28px_70px_rgba(16,40,32,.18)]" style={{ backgroundColor: index === 1 ? "#294b61" : index === 2 ? "#755136" : undefined }}>
-                  <span className="grid size-12 place-items-center rounded-full bg-white/12"><Compass /></span><p className="mt-16 text-sm text-white/55">{region.destinations.length} destinations</p><h3 className="display-title mt-2 text-4xl">{region.name}</h3><p className="mt-3 text-sm leading-6 text-white/72">{region.blurb}</p><span className="mt-7 inline-flex items-center gap-2 text-sm font-bold text-accent">Explore region <ArrowRight size={16} className="transition group-hover:translate-x-1" /></span>
-                </Link></Reveal>
-              ))}
-            </div>
+            {catalog.status === "setup" ? (
+              <CatalogSetupPanel />
+            ) : regions.length === 0 ? (
+              <div className="mt-12">
+                <EmptyState title="No regions yet" description="Add regions and destinations with Prisma Studio. See docs/ADDING_REAL_DATA.md." />
+              </div>
+            ) : (
+              <div className="mt-12 grid gap-5 md:grid-cols-3">
+                {regions.map((region, index) => (
+                  <Reveal key={region.slug}><Link href={"/regions/" + region.slug} className="focus-ring group block min-h-72 overflow-hidden rounded-[2rem] border border-white/10 bg-primary p-7 text-white shadow-[0_20px_55px_rgba(16,40,32,.13)] transition duration-300 hover:-translate-y-1.5 hover:shadow-[0_28px_70px_rgba(16,40,32,.18)]" style={{ backgroundColor: index === 1 ? "#294b61" : index === 2 ? "#755136" : undefined }}>
+                    <span className="grid size-12 place-items-center rounded-full bg-white/12"><Compass /></span><p className="mt-16 text-sm text-white/55">{region.destinations.length} destinations</p><h3 className="display-title mt-2 text-4xl">{region.name}</h3>{region.blurb ? <p className="mt-3 text-sm leading-6 text-white/72">{region.blurb}</p> : null}<span className="mt-7 inline-flex items-center gap-2 text-sm font-bold text-accent">Explore region <ArrowRight size={16} className="transition group-hover:translate-x-1" /></span>
+                  </Link></Reveal>
+                ))}
+              </div>
+            )}
           </div>
         </section>
 
         <section className="section-pad bg-[#e8efe9]">
           <div className="container-shell">
-            <Reveal className="flex flex-wrap items-end justify-between gap-6"><div><p className="eyebrow text-[#5a7f73]">A better way north</p><h2 className="display-title mt-3 text-5xl md:text-7xl">Plan with context.</h2></div><Button asChild variant="outline"><Link href="/packages">View all sample packages <ArrowRight size={17} /></Link></Button></Reveal>
-            <div className="mt-12 grid gap-6 lg:grid-cols-3">{featured.map((item, index) => <Reveal key={item.slug}><DestinationCard destination={item} index={index} /></Reveal>)}</div>
+            <Reveal className="flex flex-wrap items-end justify-between gap-6"><div><p className="eyebrow text-[#5a7f73]">A better way north</p><h2 className="display-title mt-3 text-5xl md:text-7xl">Plan with context.</h2></div><Button asChild variant="outline"><Link href="/packages">View all packages <ArrowRight size={17} /></Link></Button></Reveal>
+            {featured.length > 0 ? (
+              <div className="mt-12 grid gap-6 lg:grid-cols-3">{featured.map((item, index) => <Reveal key={item.slug}><DestinationCard destination={item} index={index} /></Reveal>)}</div>
+            ) : catalog.status === "ready" ? (
+              <div className="mt-12">
+                <EmptyState title="No featured destinations yet" description="Once destinations exist in the database, highlights will appear here." />
+              </div>
+            ) : null}
           </div>
         </section>
 

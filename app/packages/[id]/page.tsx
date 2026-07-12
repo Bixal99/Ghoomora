@@ -7,17 +7,34 @@ import { SiteFooter } from "@/components/site-footer";
 import { JourneyWeather } from "@/components/weather-forecast";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import { getPackage, getPickupCities } from "@/lib/data";
+import { CatalogSetupPanel } from "@/components/catalog-setup-panel";
+import { getPackage, getPickupCities, isCatalogSetupError } from "@/lib/data";
 import { formatPKR } from "@/lib/utils";
 import { getWeatherForecast } from "@/lib/weather";
 
 export const dynamic = "force-dynamic";
 
 export default async function PackagePage({ params }: { params: Promise<{ id: string }> }) {
-  const pkg = await getPackage((await params).id);
-  if (!pkg) notFound();
+  let pkg;
+  let cities;
+  try {
+    pkg = await getPackage((await params).id);
+    if (!pkg) notFound();
+    cities = await getPickupCities();
+  } catch (error) {
+    if (isCatalogSetupError(error)) {
+      return (
+        <>
+          <InnerHeaderShell />
+          <main><CatalogSetupPanel /></main>
+          <SiteFooter />
+        </>
+      );
+    }
+    throw error;
+  }
   const uniqueStops = Array.from(new Map(pkg.stops.map((stop) => [stop.destination.id, stop.destination])).values());
-  const [cities, forecasts] = await Promise.all([getPickupCities(), Promise.all(uniqueStops.map(getWeatherForecast))]);
+  const forecasts = await Promise.all(uniqueStops.map(getWeatherForecast));
   const weatherRisks = Object.fromEntries(
     uniqueStops.map((stop, index) => [stop.id, forecasts[index]?.days[0]?.risk]).filter(([, risk]) => risk),
   ) as Record<string, import("@/lib/route-types").TravelRisk>;
