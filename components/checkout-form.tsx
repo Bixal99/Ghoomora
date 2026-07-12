@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { toast } from "sonner";
 import { createBooking } from "@/app/actions/booking";
 import type { PackageView } from "@/lib/data";
 import type { PriceEstimate } from "@/lib/pricing-core";
@@ -43,7 +44,9 @@ export function CheckoutForm({
       formData.set("travelersJson", JSON.stringify(travelers));
       await createBooking(formData);
     } catch (reason) {
-      setError(reason instanceof Error ? reason.message : "Checkout failed.");
+      const message = reason instanceof Error ? reason.message : "Checkout failed.";
+      setError(message);
+      toast.error(message);
       setSubmitting(false);
     }
   }

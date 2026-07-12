@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { toast } from "sonner";
 import { createFare, createLocalHireRate, createVehicle } from "@/app/actions/vendor";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -10,6 +11,10 @@ const vehicleTypes = ["COASTER", "CAR", "WAGON", "LAND_CRUISER", "PRADO", "JEEP"
 
 type VehicleOption = { id: string; type: string; seats: number };
 type NamedOption = { id: string; name: string };
+
+function errorMessage(reason: unknown) {
+  return reason instanceof Error ? reason.message : "Something went wrong.";
+}
 
 export function FleetForms({
   pickupVehicles,
@@ -33,11 +38,38 @@ export function FleetForms({
   const [localVehicleId, setLocalVehicleId] = useState(localHireVehicles[0]?.id ?? "");
   const [destinationId, setDestinationId] = useState(destinations[0]?.id ?? "");
 
+  async function onCreateVehicle(formData: FormData) {
+    try {
+      await createVehicle(formData);
+      toast.success("Vehicle added");
+    } catch (reason) {
+      toast.error(errorMessage(reason));
+    }
+  }
+
+  async function onCreateFare(formData: FormData) {
+    try {
+      await createFare(formData);
+      toast.success("Pickup fare saved");
+    } catch (reason) {
+      toast.error(errorMessage(reason));
+    }
+  }
+
+  async function onCreateLocalHire(formData: FormData) {
+    try {
+      await createLocalHireRate(formData);
+      toast.success("Local hire rate saved");
+    } catch (reason) {
+      toast.error(errorMessage(reason));
+    }
+  }
+
   return (
     <div className="mt-8 grid gap-6 xl:grid-cols-3">
       <Card className="p-7">
         <h2 className="text-xl font-extrabold">Add vehicle</h2>
-        <form action={createVehicle} className="mt-5 grid gap-4">
+        <form action={onCreateVehicle} className="mt-5 grid gap-4">
           <Field label="Type">
             <FormSelect
               name="type"
@@ -60,7 +92,7 @@ export function FleetForms({
 
       <Card className="p-7">
         <h2 className="text-xl font-extrabold">Set pickup fare</h2>
-        <form action={createFare} className="mt-5 grid gap-4">
+        <form action={onCreateFare} className="mt-5 grid gap-4">
           <Field
             label="Vehicle"
             hint={!pickupVehicles.length ? "Pickup fares need a COASTER (shared) or CAR (private) in your fleet." : undefined}
@@ -112,7 +144,7 @@ export function FleetForms({
 
       <Card className="p-7">
         <h2 className="text-xl font-extrabold">Set local day-hire</h2>
-        <form action={createLocalHireRate} className="mt-5 grid gap-4">
+        <form action={onCreateLocalHire} className="mt-5 grid gap-4">
           <Field
             label="4x4 vehicle"
             hint={!localHireVehicles.length ? "Add a JEEP, WAGON, PRADO, or LAND_CRUISER in the first column — COASTER/CAR cannot be used here." : undefined}

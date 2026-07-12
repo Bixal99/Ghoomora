@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { ExternalLink } from "lucide-react";
 import { ApplicationStatus, Role } from "@prisma/client";
-import { approveVendorApplication, rejectVendorApplication } from "@/app/actions/admin";
 import { AccessPanel } from "@/components/access-panel";
+import { ApproveApplicationButton, RejectApplicationForm } from "@/components/admin-application-actions";
 import { PortalShell } from "@/components/portal-shell";
 import { WelcomeToast } from "@/components/welcome-toast";
 import { Badge } from "@/components/ui/badge";
@@ -101,18 +101,8 @@ export default async function ApprovalsPage({ searchParams }: { searchParams: Pr
 
             {tab === "pending" && (
               <div className="mt-6 flex flex-col gap-3 border-t border-primary/10 pt-5 sm:flex-row sm:items-end sm:justify-between">
-                <form action={rejectVendorApplication} className="grid flex-1 gap-2">
-                  <input type="hidden" name="applicationId" value={application.id} />
-                  <label className="text-xs font-bold text-muted-foreground">Rejection note (optional, shown to applicant)</label>
-                  <div className="flex gap-2">
-                    <input name="rejectionNote" className="focus-ring h-11 flex-1 rounded-xl border border-primary/15 bg-white px-3 text-sm" placeholder="Reason for rejection" />
-                    <Button variant="outline" type="submit">Reject</Button>
-                  </div>
-                </form>
-                <form action={approveVendorApplication}>
-                  <input type="hidden" name="applicationId" value={application.id} />
-                  <Button type="submit">Approve application</Button>
-                </form>
+                <RejectApplicationForm applicationId={application.id} />
+                <ApproveApplicationButton applicationId={application.id} />
               </div>
             )}
           </Card>

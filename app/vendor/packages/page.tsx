@@ -1,11 +1,10 @@
 import { VendorType } from "@prisma/client";
-import { createPackage } from "@/app/actions/vendor";
 import { AccessPanel } from "@/components/access-panel";
+import { CreatePackageForm } from "@/components/create-package-form";
 import { EmptyState } from "@/components/empty-state";
 import { PackageStopEditor } from "@/components/package-stop-editor";
 import { PortalShell } from "@/components/portal-shell";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { getActor } from "@/lib/auth";
 import { getDb } from "@/lib/db";
@@ -38,17 +37,7 @@ export default async function VendorPackagesPage() {
       ) : (
         <Card className="mt-8 p-7">
           <h2 className="text-xl font-extrabold">Create complete package structure</h2>
-          <form action={createPackage} className="mt-5 grid gap-4 md:grid-cols-2">
-            <label className="text-sm font-bold">Title<input name="title" required className="focus-ring mt-2 h-11 w-full rounded-xl border bg-white px-3" /></label>
-            <label className="text-sm font-bold">First destination<select name="destinationId" className="focus-ring mt-2 h-11 w-full rounded-xl border bg-white px-3">{destinations.map((item) => <option key={item.id} value={item.id}>{item.name} · {item.region.name}</option>)}</select></label>
-            <label className="text-sm font-bold md:col-span-2">Description<textarea name="description" minLength={20} required rows={3} className="focus-ring mt-2 w-full rounded-xl border bg-white px-3" /></label>
-            <label className="text-sm font-bold">Minimum days<input name="minDays" type="number" min={2} required className="focus-ring mt-2 h-11 w-full rounded-xl border bg-white px-3" /></label>
-            <label className="text-sm font-bold">Maximum days<input name="maxDays" type="number" min={2} required className="focus-ring mt-2 h-11 w-full rounded-xl border bg-white px-3" /></label>
-            {[["standardRate", "Standard daily rate"], ["moderateRate", "Moderate daily rate"], ["luxuryRate", "Luxury daily rate"]].map(([name, label]) => (
-              <label key={name} className="text-sm font-bold">{label}<input name={name} type="number" min={1} required className="focus-ring mt-2 h-11 w-full rounded-xl border bg-white px-3" /></label>
-            ))}
-            <Button className="md:col-span-2">Create package</Button>
-          </form>
+          <CreatePackageForm destinations={destinations.map((item) => ({ id: item.id, name: item.name, regionName: item.region.name }))} />
         </Card>
       )}
 
