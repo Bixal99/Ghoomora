@@ -6,13 +6,14 @@ import type { Adapter } from "next-auth/adapters";
 import { Role } from "@prisma/client";
 import { getDb } from "@/lib/db";
 import { verifyPassword } from "@/lib/password";
+import { getDefaultMaxAgeSeconds, getRememberMeMaxAgeSeconds } from "@/lib/auth-session";
 import { authConfig } from "@/auth.config";
 
 const db = getDb();
 const adapter = db ? (PrismaAdapter(db) as Adapter) : undefined;
 
-const THIRTY_DAYS = 30 * 24 * 60 * 60;
-const ONE_DAY = 24 * 60 * 60;
+// Cookie Max-Age uses the remember-me ceiling; actual short-session validity is Session.expires in the DB.
+const rememberMeMaxAge = getRememberMeMaxAgeSeconds();
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   ...authConfig,
@@ -20,7 +21,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   // With an adapter and no explicit strategy, Auth.js uses database-backed sessions.
   // We avoid setting strategy: "database" explicitly so the Credentials provider guard
   // is not tripped; the jwt.encode override below still persists a real Session row.
-  session: { maxAge: THIRTY_DAYS },
+  session: { maxAge: rememberMeMaxAge },
   providers: [
     Credentials({
       credentials: {
@@ -75,7 +76,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (!userId) throw new Error("No user id in token.");
       const client = getDb();
       if (!client) throw new Error("Database is not configured.");
-      const lifetime = params.token.rememberMe ? THIRTY_DAYS : ONE_DAY;
+      const lifetime = params.token.rememberMe ? getRememberMeMaxAgeSeconds() : getDefaultMaxAgeSeconds();
       const sessionToken = crypto.randomUUID();
       await client.session.create({
         data: { sessionToken, userId, expires: new Date(Date.now() + lifetime * 1000) },
