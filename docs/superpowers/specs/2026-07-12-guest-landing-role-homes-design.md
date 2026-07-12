@@ -1,7 +1,7 @@
 # Guest Landing + Role Homes Redesign
 
 **Date:** 2026-07-12  
-**Status:** Approved design (awaiting implementation plan)
+**Status:** Implemented
 
 ## Objective
 
