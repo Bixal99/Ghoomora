@@ -12,7 +12,7 @@ One landing page with role-aware CTAs and navigation. Hide links, sections, and 
 | Role | Default destination |
 |------|---------------------|
 | Guest | — |
-| CUSTOMER | `/` |
+| CUSTOMER | `/home` |
 | VENDOR | `/dashboard` |
 | ADMIN | `/approvals` |
 

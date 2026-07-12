@@ -13,6 +13,7 @@ export type ActorContext = NonNullable<Awaited<ReturnType<typeof getActor>>>;
 export function getRoleHomePath(role: Role | string | undefined): string {
   if (role === Role.ADMIN) return "/approvals";
   if (role === Role.VENDOR) return "/dashboard";
+  if (role === Role.CUSTOMER) return "/home";
   return "/";
 }
 
@@ -47,6 +48,7 @@ export function getPublicNav(actor: ActorContext | null): NavLink[] {
   }
 
   const links: NavLink[] = [
+    { href: "/home", label: "Home" },
     { href: "/regions/gilgit-baltistan", label: "Regions" },
     { href: "/packages", label: "Packages" },
     { href: "/trip-builder", label: "Trip builder" },
@@ -145,6 +147,7 @@ export function getAccountMenuLinks(role: Role | string | undefined): NavLink[] 
   }
 
   return [
+    { href: "/home", label: "Home" },
     { href: "/profile", label: "Profile" },
     { href: "/bookings", label: "Bookings" },
   ];
