@@ -11,15 +11,17 @@ export function SiteHeader({
   navLinks,
   exploreHref = "/packages",
   accountMenuLinks,
+  homeHref = "/",
 }: {
   navLinks: NavLink[];
   exploreHref?: string | null;
   accountMenuLinks?: NavLink[];
+  homeHref?: string;
 }) {
   return (
     <header className="absolute inset-x-0 top-0 z-50 py-4 text-white">
       <div className="container-shell flex h-16 items-center justify-between rounded-full border border-white/15 bg-[#0b261f]/55 px-4 shadow-[0_16px_50px_rgba(4,18,14,.24)] backdrop-blur-xl md:px-6">
-        <Link href="/" className="focus-ring flex items-center gap-2 rounded-lg font-extrabold tracking-tight" aria-label="Ghoomora home">
+        <Link href={homeHref} className="focus-ring flex items-center gap-2 rounded-lg font-extrabold tracking-tight" aria-label="Ghoomora home">
           <span className="grid size-10 place-items-center rounded-full bg-accent text-primary"><MountainSnow size={21} /></span>
           <span className="text-xl">Ghoomora</span>
         </Link>

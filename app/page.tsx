@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { ArrowRight, BedDouble, BusFront, Compass, Map, ShieldCheck, TentTree, UsersRound } from "lucide-react";
 import { HeroScene } from "@/components/hero-scene";
 import { GradientText } from "@/components/reactbits/gradient-text";
@@ -14,14 +15,15 @@ import { getActor } from "@/lib/auth";
 import { loadRegions } from "@/lib/data";
 import { CatalogSetupPanel } from "@/components/catalog-setup-panel";
 import { EmptyState } from "@/components/empty-state";
-import { Role } from "@prisma/client";
+import { getRoleHomePath } from "@/lib/navigation";
 
 export const dynamic = "force-dynamic";
 
 export default async function Home() {
-  const catalog = await loadRegions();
   const actor = await getActor();
-  const showPartnerCta = actor?.role === Role.VENDOR || actor?.role === Role.ADMIN;
+  if (actor) redirect(getRoleHomePath(actor.role));
+
+  const catalog = await loadRegions();
   const regions = catalog.status === "ready" ? catalog.data : [];
   const featured = regions.flatMap((region) => region.destinations).filter((item) => ["hunza-valley", "deosai-sheosar-lake", "saif-ul-malook-lake"].includes(item.slug));
   const destinationCount = regions.flatMap((item) => item.destinations).length;
@@ -94,7 +96,7 @@ export default async function Home() {
           <div className="container-shell">
             <Reveal className="text-center"><p className="eyebrow text-[#5a7f73]">Local expertise, one platform</p><h2 className="display-title mx-auto mt-3 max-w-4xl text-5xl md:text-7xl">Built for travelers and the people who make journeys possible.</h2></Reveal>
             <div className="mt-12 grid gap-4 md:grid-cols-4">{[{ icon: BusFront, title: "Transport" }, { icon: BedDouble, title: "Hotels" }, { icon: UsersRound, title: "Guides" }, { icon: TentTree, title: "Camps" }].map((item) => <Card key={item.title} className="p-6 text-center"><item.icon className="mx-auto text-[#397668]" /><h3 className="mt-5 font-extrabold">{item.title}</h3><p className="mt-2 text-sm text-muted-foreground">One vendor profile can manage this service alongside others.</p></Card>)}</div>
-            <Reveal className="mt-10 rounded-[2.5rem] border border-[#d99a3f] bg-[linear-gradient(135deg,#f4bd68,#e9a74a)] p-8 shadow-[0_25px_70px_rgba(98,67,23,.18)] md:flex md:items-center md:justify-between md:p-12"><div><p className="eyebrow">For Northern Pakistan’s operators</p><h3 className="display-title mt-2 text-4xl md:text-5xl">Bring your business into the journey.</h3></div>{showPartnerCta ? <Button asChild size="lg" className="mt-6 md:mt-0"><Link href="/dashboard">Open partner portal <ArrowRight size={18} /></Link></Button> : <Button asChild size="lg" className="mt-6 md:mt-0"><Link href="/profile#vendor-application">Become a vendor <ArrowRight size={18} /></Link></Button>}</Reveal>
+            <Reveal className="mt-10 rounded-[2.5rem] border border-[#d99a3f] bg-[linear-gradient(135deg,#f4bd68,#e9a74a)] p-8 shadow-[0_25px_70px_rgba(98,67,23,.18)] md:flex md:items-center md:justify-between md:p-12"><div><p className="eyebrow">For Northern Pakistan’s operators</p><h3 className="display-title mt-2 text-4xl md:text-5xl">Bring your business into the journey.</h3></div><Button asChild size="lg" className="mt-6 md:mt-0"><Link href="/profile#vendor-application">Become a vendor <ArrowRight size={18} /></Link></Button></Reveal>
           </div>
         </section>
       </main>

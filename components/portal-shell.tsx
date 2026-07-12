@@ -14,9 +14,9 @@ import {
   TentTree,
   UserRound,
 } from "lucide-react";
-import type { VendorType } from "@prisma/client";
+import { Role, type VendorType } from "@prisma/client";
 import type { ReactNode } from "react";
-import { getPortalNav } from "@/lib/navigation";
+import { getPortalNav, getRoleHomePath } from "@/lib/navigation";
 
 const ICONS = {
   overview: LayoutDashboard,
@@ -40,6 +40,7 @@ export function PortalShell({
   vendorTypes?: VendorType[];
 }) {
   const pathname = usePathname();
+  const homeHref = getRoleHomePath(admin ? Role.ADMIN : Role.VENDOR);
   const nav = getPortalNav(vendorTypes, admin).map((item) => ({
     ...item,
     icon: ICONS[item.iconKey as keyof typeof ICONS] ?? LayoutDashboard,
@@ -48,7 +49,7 @@ export function PortalShell({
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_100%_0%,rgba(240,179,87,.10),transparent_24rem),#eef1eb]">
       <aside className="fixed inset-y-0 left-0 hidden w-64 flex-col border-r border-white/5 bg-[linear-gradient(180deg,#12372e,#0c261f)] p-6 text-white shadow-2xl lg:flex">
-        <Link href="/" className="flex items-center gap-2 text-xl font-extrabold"><MountainSnow className="text-accent" /> Ghoomora</Link>
+        <Link href={homeHref} className="flex items-center gap-2 text-xl font-extrabold"><MountainSnow className="text-accent" /> Ghoomora</Link>
         <p className="eyebrow mt-10 text-white/40">{admin ? "Admin" : "Partner"} portal</p>
         <nav className="mt-5 grid gap-1.5">
           {nav.map((item) => {
@@ -65,11 +66,11 @@ export function PortalShell({
             );
           })}
         </nav>
-        <Link href="/" className="mt-auto text-sm text-white/55 hover:text-white">← Public site</Link>
+        <Link href="/packages" className="mt-auto text-sm text-white/55 hover:text-white">← Public site</Link>
       </aside>
 
       <header className="sticky top-0 z-20 flex items-center gap-3 overflow-x-auto bg-[#102e27] px-4 py-3 text-white lg:hidden">
-        <Link href="/" className="flex shrink-0 items-center gap-2 font-extrabold"><MountainSnow className="text-accent" size={20} /> Ghoomora</Link>
+        <Link href={homeHref} className="flex shrink-0 items-center gap-2 font-extrabold"><MountainSnow className="text-accent" size={20} /> Ghoomora</Link>
         <nav className="flex gap-1">
           {nav.map((item) => {
             const active = pathname === item.href || pathname.startsWith(item.href + "/");
