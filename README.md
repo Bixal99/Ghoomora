@@ -69,7 +69,7 @@ Ghoomora is a full-stack travel platform that connects travelers with verified n
 | --- | --- |
 | **Framework** | Next.js 16 (App Router), React 19, TypeScript |
 | **Styling & motion** | Tailwind CSS 4, Poppins, Framer Motion, GSAP, Three.js hero scene |
-| **Database** | Prisma 7 + PostgreSQL (Neon) |
+| **Database** | Prisma 7 + PostgreSQL (local for development; Neon or compatible in production) |
 | **Auth** | Auth.js (NextAuth v5) — Credentials provider, database sessions via Prisma adapter |
 | **Maps & routing** | MapLibre GL, OpenStreetMap, OpenRouteService |
 | **Weather & safety** | Open-Meteo, Overpass API |
@@ -96,7 +96,7 @@ flowchart TB
   end
 
   subgraph data [Data & services]
-    prisma[Prisma + Neon]
+    prisma[Prisma + PostgreSQL]
     ors[OpenRouteService]
     meteo[Open-Meteo]
     groq[Groq AI]
@@ -123,7 +123,7 @@ flowchart TB
 ### Prerequisites
 
 - **Node.js 20+**
-- A [Neon](https://neon.tech) PostgreSQL database
+- Local PostgreSQL (e.g. via pgAdmin 4) for development — production can use Neon or any Postgres-compatible provider
 
 ### 1. Clone and install
 
@@ -147,7 +147,7 @@ Open `.env` and fill in your credentials. Use `.env.example` as the reference te
 
 | Variable | Purpose |
 | --- | --- |
-| `DATABASE_URL` | Neon PostgreSQL connection string (also backs Auth.js sessions) |
+| `DATABASE_URL` | PostgreSQL connection string — local Postgres for development; Neon or compatible for production (also backs Auth.js sessions) |
 | `AUTH_SECRET` | Auth.js signing/encryption secret — generate with `npx auth secret` |
 | `NEXT_PUBLIC_APP_URL` | App origin, e.g. `http://localhost:3000` |
 | `ADMIN_EMAIL`, `ADMIN_PASSWORD` | Seed-only — create the single admin account (see [For admins](#for-admins)) |
@@ -160,18 +160,19 @@ Open `.env` and fill in your credentials. Use `.env.example` as the reference te
 | `GROQ_API_KEY` | AI trip planner — falls back to demo suggestions without it |
 | `NEXT_PUBLIC_PUSHER_KEY`, `PUSHER_*` | Live trip tracking |
 | `CLOUDINARY_*` | Image uploads and vendor application documents |
-| `SEED_VENDOR_PASSWORD` | Seed-only — password for the sample vendor account |
 
-> **Security:** If `.env` was ever pushed to a remote, rotate every secret (Neon, `AUTH_SECRET`, Groq, Cloudinary, Pusher, ORS) before deploying.
+> **Security:** If `.env` was ever pushed to a remote, rotate every secret (`DATABASE_URL`, `AUTH_SECRET`, Groq, Cloudinary, Pusher, ORS) before deploying.
 
 ### 3. Set up the database
+
+Create an empty database in pgAdmin (or `createdb`), then point `DATABASE_URL` at it — for example `postgresql://postgres:YOUR_PASSWORD@localhost:5432/ghoomora` (no `sslmode` needed locally).
 
 ```powershell
 npm run db:migrate
 npm run db:seed
 ```
 
-This creates the schema, the single admin account (from `ADMIN_EMAIL` / `ADMIN_PASSWORD`), and seeds regions, destinations, sample packages, and demo inventory.
+This creates the schema, the single admin account (from `ADMIN_EMAIL` / `ADMIN_PASSWORD`), and seeds regions, destinations, and pickup cities. No fake vendors, packages, or fares.
 
 ### 4. Authentication
 
@@ -267,7 +268,7 @@ Approval — not sign-up — is what promotes a user to `VENDOR`. Verification c
 | `npm test` | Vitest unit tests |
 | `npm run lint` | ESLint |
 | `npm run db:migrate` | Apply Prisma migrations |
-| `npm run db:seed` | Seed regions, destinations, sample packages |
+| `npm run db:seed` | Seed admin, regions, destinations, pickup cities |
 | `npm run db:generate` | Regenerate Prisma client |
 
 ---

@@ -29,14 +29,14 @@ Landing page: build an animated hero (mountains, clouds, birds, parallax) with G
 | Animation | Framer Motion app-wide; GSAP + Three.js on the landing page hero only |
 | Maps & Routing | MapLibre GL + OpenStreetMap tiles + OpenRouteService (routing, elevation, multi-waypoint) |
 | Charts | Chart.js or Recharts |
-| ORM / DB | Prisma + PostgreSQL (Neon free tier) — do not use Railway for this; its free tier is now a 30-day $5 trial then ~$1/mo, not enough to run a database |
+| ORM / DB | Prisma + PostgreSQL — local Postgres for development; Neon (or any Postgres-compatible provider) for production. Do not use Railway for this; its free tier is now a 30-day $5 trial then ~$1/mo, not enough to run a database |
 | Auth | Clerk |
 | File storage | UploadThing or Cloudinary free tier |
 | AI | Groq (Llama 3.x) or Gemini free tier — scoped only to itinerary generation and cost estimation, nothing else |
 | Realtime | Pusher free tier — Phase 6 only, see Out of Scope. Do not deploy the Socket.io alternative on Railway; same free-tier problem as the database row above |
 | PDF | @react-pdf/renderer |
 | Safety data | OSM Overpass API — no manual data entry for hospitals/checkpoints/fuel |
-| Deployment | Vercel (web) + Neon (DB) + Pusher (realtime, Phase 6 only) — no Railway anywhere in the stack |
+| Deployment | Vercel (web) + PostgreSQL-compatible DB (e.g. Neon) + Pusher (realtime, Phase 6 only) — no Railway anywhere in the stack |
 
 Everything above must stay on a free tier. Flag before adding any paid service.
 
