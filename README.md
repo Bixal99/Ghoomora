@@ -13,7 +13,7 @@ Discover mountain regions, compare verified trip packages, and plan with local o
 [![TypeScript](https://img.shields.io/badge/TypeScript-6-3178C6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-4-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
 [![Prisma](https://img.shields.io/badge/Prisma-7-2D3748?style=flat-square&logo=prisma&logoColor=white)](https://www.prisma.io/)
-[![Clerk](https://img.shields.io/badge/Clerk-Auth-6C47FF?style=flat-square)](https://clerk.com/)
+[![Auth.js](https://img.shields.io/badge/Auth.js-v5-000000?style=flat-square)](https://authjs.dev/)
 
 [Explore the app](#quick-start) · [Routes](#key-routes) · [Partner portal](#for-partners) · [Admin](#for-admins)
 
@@ -70,7 +70,7 @@ Ghoomora is a full-stack travel platform that connects travelers with verified n
 | **Framework** | Next.js 16 (App Router), React 19, TypeScript |
 | **Styling & motion** | Tailwind CSS 4, Poppins, Framer Motion, GSAP, Three.js hero scene |
 | **Database** | Prisma 7 + PostgreSQL (Neon) |
-| **Auth** | Clerk with webhook sync to Neon |
+| **Auth** | Auth.js (NextAuth v5) — Credentials provider, database sessions via Prisma adapter |
 | **Maps & routing** | MapLibre GL, OpenStreetMap, OpenRouteService |
 | **Weather & safety** | Open-Meteo, Overpass API |
 | **AI** | Groq (`llama-3.3-70b-versatile`) — demo mode without API key |
@@ -92,7 +92,7 @@ flowchart TB
   subgraph server [Next.js server]
     actions[Server Actions]
     api[Route Handlers]
-    auth[getActor / Clerk]
+    auth[getActor / Auth.js]
   end
 
   subgraph data [Data & services]
@@ -124,7 +124,6 @@ flowchart TB
 
 - **Node.js 20+**
 - A [Neon](https://neon.tech) PostgreSQL database
-- A [Clerk](https://clerk.com) application (publishable + secret keys)
 
 ### 1. Clone and install
 
@@ -148,12 +147,10 @@ Open `.env` and fill in your credentials. Use `.env.example` as the reference te
 
 | Variable | Purpose |
 | --- | --- |
-| `DATABASE_URL` | Neon PostgreSQL connection string |
-| `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` | Clerk frontend key |
-| `CLERK_SECRET_KEY` | Clerk backend key |
-| `CLERK_WEBHOOK_SIGNING_SECRET` | Verify `/api/webhooks/clerk` events |
-| `ADMIN_EMAILS` | Comma-separated admin emails (case-insensitive) |
+| `DATABASE_URL` | Neon PostgreSQL connection string (also backs Auth.js sessions) |
+| `AUTH_SECRET` | Auth.js signing/encryption secret — generate with `npx auth secret` |
 | `NEXT_PUBLIC_APP_URL` | App origin, e.g. `http://localhost:3000` |
+| `ADMIN_EMAIL`, `ADMIN_PASSWORD` | Seed-only — create the single admin account (see [For admins](#for-admins)) |
 
 #### Recommended & optional
 
@@ -162,9 +159,10 @@ Open `.env` and fill in your credentials. Use `.env.example` as the reference te
 | `ORS_API_KEY` | Package route visualization (OpenRouteService) |
 | `GROQ_API_KEY` | AI trip planner — falls back to demo suggestions without it |
 | `NEXT_PUBLIC_PUSHER_KEY`, `PUSHER_*` | Live trip tracking |
-| `CLOUDINARY_*` | Image uploads |
+| `CLOUDINARY_*` | Image uploads and vendor application documents |
+| `SEED_VENDOR_PASSWORD` | Seed-only — password for the sample vendor account |
 
-> **Security:** If `.env` was ever pushed to a remote, rotate every secret (Neon, Clerk, Groq, Cloudinary, Pusher, ORS) before deploying.
+> **Security:** If `.env` was ever pushed to a remote, rotate every secret (Neon, `AUTH_SECRET`, Groq, Cloudinary, Pusher, ORS) before deploying.
 
 ### 3. Set up the database
 
@@ -173,18 +171,15 @@ npm run db:migrate
 npm run db:seed
 ```
 
-This creates the schema and seeds regions, destinations, sample packages, and demo inventory.
+This creates the schema, the single admin account (from `ADMIN_EMAIL` / `ADMIN_PASSWORD`), and seeds regions, destinations, sample packages, and demo inventory.
 
-### 4. Configure Clerk
+### 4. Authentication
 
-1. In the Clerk dashboard, add a webhook endpoint:
-   ```
-   https://<your-domain>/api/webhooks/clerk
-   ```
-2. Subscribe to **`user.created`** and **`user.updated`**.
-3. Copy the signing secret into `CLERK_WEBHOOK_SIGNING_SECRET`.
+Authentication is fully self-hosted with [Auth.js v5](https://authjs.dev/) using an email/password (Credentials) provider and database-backed sessions stored in Postgres via the Prisma adapter. No third-party auth service or webhook is required.
 
-Partner sign-in uses `/sign-in` and redirects to `/dashboard` after authentication. On localhost, user profiles sync on first sign-in even without webhooks.
+- Generate `AUTH_SECRET` once with `npx auth secret` and paste it into `.env`.
+- New users sign up at `/sign-up` and are always created with the `CUSTOMER` role.
+- Sign in at `/sign-in`; database sessions let an admin revoke access or refresh a role instantly.
 
 ### 5. Run locally
 
@@ -211,7 +206,7 @@ Without full credentials, public routes run in **sample-data mode**. Protected p
 | `/packages/[id]` | Live pricing configurator + route map |
 | `/trip-builder` | Match packages + AI-assisted planning |
 | `/checkout` | Complete a booking |
-| `/sign-in` · `/sign-up` | Clerk authentication |
+| `/sign-in` · `/sign-up` | Auth.js email/password authentication |
 
 ### Partner
 
@@ -242,22 +237,22 @@ Without full credentials, public routes run in **sample-data mode**. Protected p
 
 ## For partners
 
-1. **Sign up** at `/sign-up` and complete the partner profile on `/dashboard`.
-2. Add inventory — fleet, hotels, camps, or guides depending on your services.
-3. Create packages at `/vendor/packages` with stops, tiers, and day ranges.
-4. Wait for admin approval — your dashboard shows **Awaiting approval** until verified.
-5. Once verified, packages become visible in the public catalog.
+1. **Sign up** at `/sign-up` — every account starts as a `CUSTOMER`.
+2. Open **`/profile`** and use **Become a vendor** to submit a vendor application (business name, phone, CNIC, description, services, and an optional document). Your profile shows an **Application under review** banner while it is pending.
+3. An admin reviews the application. On approval your account becomes a `VENDOR`, a vendor profile is created, and the partner dashboard unlocks. If it is rejected you can reapply from your profile.
+4. Add inventory — fleet, hotels, camps, or guides depending on your services.
+5. Create packages at `/vendor/packages` with stops, tiers, and day ranges. Once verified, packages become visible in the public catalog.
 
 ---
 
 ## For admins
 
-1. Add your email to `ADMIN_EMAILS` in `.env` and restart the dev server.
-2. Sign in with that account.
-3. Open **`/approvals`** (also linked in the site footer as *Admin approvals*).
-4. Click **Approve vendor** on the pending partner card.
+1. Set `ADMIN_EMAIL` and `ADMIN_PASSWORD` in `.env`, then run `npm run db:seed`. This creates exactly one admin account if none exists. There is no admin sign-up path in the app.
+2. Sign in at `/sign-in` with that account.
+3. Open **`/approvals`** to see each pending vendor application in full (business name, phone, CNIC, description, requested services, and any document).
+4. **Approve** to create the vendor profile and grant `VENDOR` access in a single transaction, or **Reject** with an optional note the applicant can see.
 
-Verification controls public package visibility. Partners cannot approve themselves from the dashboard.
+Approval — not sign-up — is what promotes a user to `VENDOR`. Verification controls public package visibility.
 
 ---
 
@@ -289,14 +284,15 @@ app/
   regions/[slug]/           # Region explorer
   checkout/                 # Booking checkout
   bookings/[id]/            # Booking detail + PDF voucher
-  dashboard/                # Partner onboarding & overview
+  dashboard/                # Partner overview (gated on VENDOR role)
   fleet/ hotels/ camps/     # Partner inventory
   vendor/packages/          # Partner package editor
   analytics/ approvals/     # Admin dashboards
+  sign-in/ sign-up/         # Auth.js email/password pages
   api/
+    auth/[...nextauth]/     # Auth.js route handlers
     ai-planner/             # AI itinerary + cost estimation
     bookings/[id]/voucher/  # PDF e-voucher download (GET)
-    webhooks/clerk/         # User sync webhook
 
 components/
   loading-screen.tsx        # Animated route transition loader
@@ -306,8 +302,9 @@ components/
   ai-trip-assistant.tsx     # AI planning form
 
 lib/                        # Data, pricing, auth, AI, weather, Overpass
+auth.ts / auth.config.ts    # Auth.js configuration (adapter, providers, sessions)
 prisma/                     # Schema, migrations, seed data
-proxy.ts                    # Clerk middleware (Next.js 16)
+proxy.ts                    # Auth.js role-based middleware (Next.js 16)
 ```
 
 ---

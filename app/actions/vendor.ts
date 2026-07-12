@@ -1,31 +1,13 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import { z } from "zod";
 import { HotelTier, Role, TierLevel, TransportMode, VehicleType, VendorType } from "@prisma/client";
 import { getDb } from "@/lib/db";
 import { requireActor } from "@/lib/auth";
-import { fareSchema, localHireSchema, packageStopSchema, validLocalHireVehicle, validPickupCombination, vehicleSchema, vendorSchema } from "@/lib/validation";
-
-function values(formData: FormData, key: string) { return formData.getAll(key).map(String); }
+import { fareSchema, localHireSchema, packageStopSchema, validLocalHireVehicle, validPickupCombination, vehicleSchema } from "@/lib/validation";
 
 const partnerRoles = [Role.VENDOR, Role.ADMIN] as const;
-
-export async function onboardVendor(formData: FormData) {
-  const db = getDb();
-  const actor = await requireActor([Role.CUSTOMER, Role.VENDOR, Role.ADMIN]);
-  if (!db) throw new Error("Database is not configured.");
-  const parsed = vendorSchema.parse({ businessName: formData.get("businessName"), contactPhone: formData.get("contactPhone"), description: formData.get("description") || undefined, types: values(formData, "types") });
-  await db.$transaction(async (tx) => {
-    if (actor.role !== Role.ADMIN) {
-      await tx.user.update({ where: { id: actor.id }, data: { role: Role.VENDOR } });
-    }
-    await tx.vendor.upsert({ where: { ownerId: actor.id }, update: { ...parsed, types: parsed.types as VendorType[], verified: false }, create: { ownerId: actor.id, ...parsed, types: parsed.types as VendorType[] } });
-  });
-  revalidatePath("/dashboard");
-  redirect("/dashboard?notice=Profile+submitted+for+approval");
-}
 
 export async function createVehicle(formData: FormData) {
   const db = getDb(); const actor = await requireActor([...partnerRoles]);

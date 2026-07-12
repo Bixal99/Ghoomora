@@ -1,6 +1,6 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { ArrowRight, CheckCircle2, Clock3, Package, Settings2 } from "lucide-react";
-import { onboardVendor } from "@/app/actions/vendor";
 import { updateBookingStatus } from "@/app/actions/booking";
 import { AccessPanel } from "@/components/access-panel";
 import { PortalShell } from "@/components/portal-shell";
@@ -10,14 +10,35 @@ import { Card } from "@/components/ui/card";
 import { getActor } from "@/lib/auth";
 import { getDb } from "@/lib/db";
 import { formatPKR } from "@/lib/utils";
-import { BookingStatus } from "@prisma/client";
+import { ApplicationStatus, BookingStatus, Role } from "@prisma/client";
 
 export const dynamic = "force-dynamic";
 
 export default async function DashboardPage({ searchParams }: { searchParams: Promise<{ notice?: string }> }) {
   const actor = await getActor();
   if (!actor) return <PortalShell><AccessPanel /></PortalShell>;
-  if (!actor.vendor) return <PortalShell><div className="mx-auto max-w-3xl"><p className="eyebrow text-[#5a7f73]">Partner onboarding</p><h1 className="display-title mt-2 text-6xl">Tell us what you operate.</h1><p className="mt-4 leading-7 text-muted-foreground">One account can represent transport, hotels, guides, camps—or any combination.</p><Card className="mt-8 p-7"><form action={onboardVendor} className="grid gap-5"><label className="text-sm font-bold">Business name<input name="businessName" required minLength={3} className="focus-ring mt-2 h-11 w-full rounded-xl border bg-white px-3" /></label><label className="text-sm font-bold">Contact phone<input name="contactPhone" required className="focus-ring mt-2 h-11 w-full rounded-xl border bg-white px-3" /></label><fieldset><legend className="text-sm font-bold">Services</legend><div className="mt-3 grid grid-cols-2 gap-3">{["TRANSPORT", "HOTEL", "GUIDE", "CAMP"].map((type) => <label key={type} className="rounded-xl border bg-white p-3 text-sm font-bold"><input name="types" value={type} type="checkbox" className="mr-2 accent-[#173f35]" />{type}</label>)}</div></fieldset><label className="text-sm font-bold">About your business<textarea name="description" rows={4} className="focus-ring mt-2 w-full rounded-xl border bg-white p-3" /></label><Button size="lg">Submit for approval</Button></form></Card></div></PortalShell>;
+
+  if (actor.role === Role.CUSTOMER) {
+    const application = actor.vendorApplications[0];
+    if (application?.status === ApplicationStatus.PENDING) {
+      return (
+        <PortalShell>
+          <div className="mx-auto max-w-3xl">
+            <p className="eyebrow text-[#5a7f73]">Partner application</p>
+            <h1 className="display-title mt-2 text-6xl">Application under review</h1>
+            <Card className="mt-8 p-7">
+              <div className="flex items-center gap-2 text-[#805b21]"><Clock3 size={20} /><h2 className="text-xl font-extrabold">{application.businessName}</h2></div>
+              <p className="mt-3 leading-7 text-muted-foreground">Your vendor application is with our team. The partner dashboard unlocks as soon as an admin approves it. You can review your application status any time on your profile.</p>
+              <Button asChild className="mt-6" variant="outline"><Link href="/profile">View application status</Link></Button>
+            </Card>
+          </div>
+        </PortalShell>
+      );
+    }
+    redirect("/profile");
+  }
+
+  if (!actor.vendor) return <PortalShell><AccessPanel needsOnboarding /></PortalShell>;
   const db = getDb();
   const [stats, bookings] = db
     ? await Promise.all([

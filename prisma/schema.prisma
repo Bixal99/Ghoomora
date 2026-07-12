@@ -55,20 +55,86 @@ enum VendorType {
 }
 
 model User {
-  id                  String    @id @default(cuid())
-  clerkId             String    @unique
-  role                Role      @default(CUSTOMER)
+  id                  String              @id @default(cuid())
+  role                Role                @default(CUSTOMER)
   name                String
-  email               String    @unique
+  email               String              @unique
+  emailVerified       DateTime?
+  image               String?
+  passwordHash        String?
   phone               String?
-  completedTripsCount Int       @default(0)
-  travelerLevel       String    @default("EXPLORER")
-  badges              String[]  @default([])
+  completedTripsCount Int                 @default(0)
+  travelerLevel       String              @default("EXPLORER")
+  badges              String[]            @default([])
   vendor              Vendor?
   bookings            Booking[]
   reviews             Review[]
+  accounts            Account[]
+  sessions            Session[]
+  vendorApplications  VendorApplication[]
 
   @@index([role])
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+enum ApplicationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model VendorApplication {
+  id             String            @id @default(cuid())
+  userId         String
+  user           User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  businessName   String
+  phone          String
+  cnic           String
+  description    String
+  requestedTypes VendorType[]
+  documentUrl    String?
+  status         ApplicationStatus @default(PENDING)
+  rejectionNote  String?
+  reviewedById   String?
+  reviewedAt     DateTime?
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+
+  @@index([userId])
+  @@index([status])
 }
 
 model Vendor {

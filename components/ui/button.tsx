@@ -3,15 +3,15 @@ import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
-const buttonVariants = cva("focus-ring inline-flex items-center justify-center gap-2 rounded-full font-bold transition disabled:pointer-events-none disabled:opacity-50", {
+const buttonVariants = cva("focus-ring relative inline-flex max-w-full select-none items-center justify-center gap-2 rounded-full border border-transparent text-center font-bold leading-tight shadow-sm transition duration-200 hover:-translate-y-0.5 hover:shadow-md active:translate-y-0 active:shadow-sm disabled:pointer-events-none disabled:translate-y-0 disabled:opacity-50", {
   variants: {
     variant: {
-      default: "bg-primary text-primary-foreground hover:bg-[#225548]",
-      accent: "bg-accent text-[#142b24] hover:bg-[#f0bb67]",
-      outline: "border bg-transparent hover:bg-white/60",
-      ghost: "hover:bg-white/60",
+      default: "bg-primary text-white hover:bg-[#205548]",
+      accent: "bg-accent text-[#15362d] hover:bg-[#f7c36f]",
+      outline: "border-primary/20 bg-transparent text-foreground shadow-none hover:border-primary/35 hover:bg-white/70",
+      ghost: "text-foreground shadow-none hover:bg-white/65",
     },
-    size: { default: "h-11 px-6", sm: "h-9 px-4 text-sm", lg: "h-14 px-8 text-base", icon: "size-11" },
+    size: { default: "min-h-11 px-6 py-2.5", sm: "min-h-9 px-4 py-2 text-sm", lg: "min-h-14 px-8 py-3.5 text-base", icon: "size-11 p-0" },
   },
   defaultVariants: { variant: "default", size: "default" },
 });

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { KeyRound, UserPlus } from "lucide-react";
+import { KeyRound, Store } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { authIsConfigured } from "@/lib/auth";
@@ -11,10 +11,10 @@ export function AccessPanel({ redirectTo = "/dashboard", needsOnboarding = false
     return (
       <div className="grid min-h-[70vh] place-items-center">
         <Card className="max-w-lg p-9 text-center">
-          <span className="mx-auto grid size-14 place-items-center rounded-full bg-muted"><UserPlus /></span>
-          <h1 className="display-title mt-5 text-4xl">Complete your partner profile</h1>
-          <p className="mt-4 text-sm leading-7 text-muted-foreground">You are signed in, but this workspace needs a vendor profile. Set one up to manage fleet, hotels, guides, camps and packages.</p>
-          <Button asChild className="mt-6"><Link href="/dashboard">Set up partner profile</Link></Button>
+          <span className="mx-auto grid size-14 place-items-center rounded-full bg-muted"><Store /></span>
+          <h1 className="display-title mt-5 text-4xl">Become a vendor first</h1>
+          <p className="mt-4 text-sm leading-7 text-muted-foreground">This workspace is for approved vendors. Apply from your profile — once an admin approves your application you can manage fleet, hotels, guides, camps and packages.</p>
+          <Button asChild className="mt-6"><Link href="/profile">Apply on your profile</Link></Button>
         </Card>
       </div>
     );
@@ -27,8 +27,8 @@ export function AccessPanel({ redirectTo = "/dashboard", needsOnboarding = false
     <div className="grid min-h-[70vh] place-items-center">
       <Card className="max-w-lg p-9 text-center">
         <span className="mx-auto grid size-14 place-items-center rounded-full bg-muted"><KeyRound /></span>
-        <h1 className="display-title mt-5 text-4xl">{configured ? "Partner sign-in required" : "Connect Clerk and Neon"}</h1>
-        <p className="mt-4 text-sm leading-7 text-muted-foreground">{configured ? "Sign in or create an account with Clerk, then complete your partner profile on the dashboard to manage fleet, hotels, and packages." : "The public MVP is running in demo mode. Add the environment values from .env.example, run the migration and configure the Clerk webhook to enable protected workflows."}</p>
+        <h1 className="display-title mt-5 text-4xl">{configured ? "Sign-in required" : "Connect your database"}</h1>
+        <p className="mt-4 text-sm leading-7 text-muted-foreground">{configured ? "Sign in or create an account to continue. Vendor access is granted after an admin approves your application." : "The public MVP is running in demo mode. Add the environment values from .env.example, run the migration and seed to enable protected workflows."}</p>
         {configured ? (
           <div className="mt-6 flex flex-wrap justify-center gap-3">
             <Button asChild><Link href={signInHref}>Sign in</Link></Button>

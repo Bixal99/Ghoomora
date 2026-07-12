@@ -1,4 +1,5 @@
 import "dotenv/config";
+import bcrypt from "bcrypt";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient, HotelTier, TierLevel, TransportMode, VehicleType, VendorType, Role } from "@prisma/client";
 import { Pool } from "pg";
@@ -10,7 +11,29 @@ if (!process.env.DATABASE_URL) throw new Error("DATABASE_URL is required to seed
 const pool = new Pool({ connectionString: resolvePgConnectionString(process.env.DATABASE_URL) });
 const prisma = new PrismaClient({ adapter: new PrismaPg(pool) });
 
+async function seedAdmin() {
+  const email = process.env.ADMIN_EMAIL?.trim().toLowerCase();
+  const password = process.env.ADMIN_PASSWORD;
+  if (!email || !password) {
+    console.warn("Skipping admin seed: set ADMIN_EMAIL and ADMIN_PASSWORD to create the admin account.");
+    return;
+  }
+  const existingAdmin = await prisma.user.findFirst({ where: { role: Role.ADMIN } });
+  if (existingAdmin && existingAdmin.email.toLowerCase() !== email) {
+    console.log(`A different admin (${existingAdmin.email}) already exists — leaving it untouched.`);
+    return;
+  }
+  const passwordHash = await bcrypt.hash(password, 12);
+  await prisma.user.upsert({
+    where: { email },
+    update: { role: Role.ADMIN, passwordHash },
+    create: { email, name: process.env.ADMIN_NAME || "Ghoomora Admin", role: Role.ADMIN, passwordHash },
+  });
+  console.log(`Admin account ready: ${email}`);
+}
+
 async function main() {
+  await seedAdmin();
   const regions = new Map<string, string>();
   for (const region of regionSeed) {
     const saved = await prisma.region.upsert({ where: { slug: region.slug }, update: { name: region.name }, create: { name: region.name, slug: region.slug } });
@@ -25,7 +48,8 @@ async function main() {
   }
   for (const city of pickupCitySeed) await prisma.pickupCity.upsert({ where: { slug: city.slug }, update: city, create: city });
 
-  const owner = await prisma.user.upsert({ where: { clerkId: "seed-vendor-owner" }, update: {}, create: { clerkId: "seed-vendor-owner", email: "sample.vendor@ghoomora.pk", name: "Ghoomora Sample Vendor", role: Role.VENDOR } });
+  const vendorPasswordHash = await bcrypt.hash(process.env.SEED_VENDOR_PASSWORD || "ChangeMe123!", 12);
+  const owner = await prisma.user.upsert({ where: { email: "sample.vendor@ghoomora.pk" }, update: { passwordHash: vendorPasswordHash, role: Role.VENDOR }, create: { email: "sample.vendor@ghoomora.pk", name: "Ghoomora Sample Vendor", role: Role.VENDOR, passwordHash: vendorPasswordHash } });
   const vendor = await prisma.vendor.upsert({ where: { ownerId: owner.id }, update: { verified: true }, create: { ownerId: owner.id, businessName: "Northbound Expeditions — Sample", types: [VendorType.TRANSPORT, VendorType.HOTEL, VendorType.GUIDE], verified: true, contactPhone: "+92 300 0000000", description: "Representative development data, not a live vendor." } });
   const coaster = await prisma.vehicle.findFirst({ where: { vendorId: vendor.id, type: VehicleType.COASTER } }) ?? await prisma.vehicle.create({ data: { vendorId: vendor.id, type: VehicleType.COASTER, seats: 22, ac: true } });
   const car = await prisma.vehicle.findFirst({ where: { vendorId: vendor.id, type: VehicleType.CAR } }) ?? await prisma.vehicle.create({ data: { vendorId: vendor.id, type: VehicleType.CAR, seats: 4, ac: true } });

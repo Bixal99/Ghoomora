@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BedDouble, BusFront, LayoutDashboard, MountainSnow, Package, ShieldCheck, TentTree, UserRound } from "lucide-react";
+import { BarChart3, BedDouble, BusFront, LayoutDashboard, MountainSnow, Package, ShieldCheck, TentTree, UserRound } from "lucide-react";
 import type { ReactNode } from "react";
 
 const links = [
@@ -16,11 +16,16 @@ const links = [
 
 export function PortalShell({ children, admin = false }: { children: ReactNode; admin?: boolean }) {
   const pathname = usePathname();
-  const nav = admin ? [{ href: "/approvals", label: "Approvals", icon: ShieldCheck }] : links;
+  const nav = admin
+    ? [
+        { href: "/approvals", label: "Approvals", icon: ShieldCheck },
+        { href: "/analytics", label: "Analytics", icon: BarChart3 },
+      ]
+    : links;
 
   return (
-    <div className="min-h-screen bg-[#edf0ea]">
-      <aside className="fixed inset-y-0 left-0 hidden w-64 flex-col bg-[#102e27] p-6 text-white lg:flex">
+    <div className="min-h-screen bg-[radial-gradient(circle_at_100%_0%,rgba(240,179,87,.10),transparent_24rem),#eef1eb]">
+      <aside className="fixed inset-y-0 left-0 hidden w-64 flex-col border-r border-white/5 bg-[linear-gradient(180deg,#12372e,#0c261f)] p-6 text-white shadow-2xl lg:flex">
         <Link href="/" className="flex items-center gap-2 text-xl font-extrabold"><MountainSnow className="text-accent" /> Ghoomora</Link>
         <p className="eyebrow mt-10 text-white/40">{admin ? "Admin" : "Partner"} portal</p>
         <nav className="mt-5 grid gap-1.5">
@@ -31,7 +36,7 @@ export function PortalShell({ children, admin = false }: { children: ReactNode; 
                 key={item.href}
                 href={item.href}
                 aria-current={active ? "page" : undefined}
-                className={"flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-bold transition " + (active ? "bg-accent text-primary" : "text-white/70 hover:bg-white/10 hover:text-white")}
+                className={"flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-bold transition " + (active ? "bg-accent text-primary shadow-lg shadow-black/10" : "text-white/70 hover:bg-white/10 hover:text-white")}
               >
                 <item.icon size={18} />{item.label}
               </Link>
@@ -61,7 +66,7 @@ export function PortalShell({ children, admin = false }: { children: ReactNode; 
         </nav>
       </header>
 
-      <main className="lg:pl-64"><div className="mx-auto max-w-6xl p-5 md:p-10">{children}</div></main>
+      <main className="lg:pl-64"><div className="mx-auto max-w-6xl p-5 pb-12 md:p-10 md:pb-16">{children}</div></main>
     </div>
   );
 }

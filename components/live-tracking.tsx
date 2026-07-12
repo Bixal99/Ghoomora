@@ -11,12 +11,12 @@ export function LiveTrackingMap({ bookingId, enabled }: { bookingId: string; ena
   const host = useRef<HTMLDivElement>(null);
   const markerRef = useRef<maplibregl.Marker | null>(null);
   const [latest, setLatest] = useState<TrackingPoint | null>(null);
-  const [status, setStatus] = useState("Waiting for live location updates…");
+  const pusherKey = process.env.NEXT_PUBLIC_PUSHER_KEY;
+  const [status, setStatus] = useState(pusherKey ? "Waiting for live location updates…" : "Live tracking is not configured yet.");
 
   useEffect(() => {
     if (!enabled || !host.current) return;
-    const key = process.env.NEXT_PUBLIC_PUSHER_KEY;
-    if (!key) { setStatus("Live tracking is not configured. Set Pusher env vars to enable."); return; }
+    if (!pusherKey) return;
     let map: maplibregl.Map;
     try {
       map = new maplibregl.Map({
@@ -25,9 +25,12 @@ export function LiveTrackingMap({ bookingId, enabled }: { bookingId: string; ena
         center: [74.35, 35.9],
         zoom: 6,
       });
-    } catch { setStatus("Map unavailable for live tracking."); return; }
+    } catch {
+      const unavailableTimer = window.setTimeout(() => setStatus("Map unavailable for live tracking."), 0);
+      return () => window.clearTimeout(unavailableTimer);
+    }
 
-    const pusher = new Pusher(key, { cluster: process.env.NEXT_PUBLIC_PUSHER_CLUSTER ?? "ap2" });
+    const pusher = new Pusher(pusherKey, { cluster: process.env.NEXT_PUBLIC_PUSHER_CLUSTER ?? "ap2" });
     const channel = pusher.subscribe("booking-" + bookingId);
     channel.bind("location", (payload: TrackingPoint) => {
       setLatest(payload);
@@ -42,7 +45,7 @@ export function LiveTrackingMap({ bookingId, enabled }: { bookingId: string; ena
     });
 
     return () => { pusher.unsubscribe("booking-" + bookingId); pusher.disconnect(); map.remove(); markerRef.current = null; };
-  }, [bookingId, enabled]);
+  }, [bookingId, enabled, pusherKey]);
 
   if (!enabled) return null;
   return (
