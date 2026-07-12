@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { toast } from "sonner";
+import { notify } from "@/lib/notify";
 import { createFare, createLocalHireRate, createVehicle } from "@/app/actions/vendor";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -41,27 +41,27 @@ export function FleetForms({
   async function onCreateVehicle(formData: FormData) {
     try {
       await createVehicle(formData);
-      toast.success("Vehicle added");
+      notify.success("Vehicle added", "Your fleet inventory was updated.");
     } catch (reason) {
-      toast.error(errorMessage(reason));
+      notify.error("Could not add vehicle", errorMessage(reason));
     }
   }
 
   async function onCreateFare(formData: FormData) {
     try {
       await createFare(formData);
-      toast.success("Pickup fare saved");
+      notify.success("Pickup fare saved");
     } catch (reason) {
-      toast.error(errorMessage(reason));
+      notify.error("Could not save fare", errorMessage(reason));
     }
   }
 
   async function onCreateLocalHire(formData: FormData) {
     try {
       await createLocalHireRate(formData);
-      toast.success("Local hire rate saved");
+      notify.success("Local hire rate saved");
     } catch (reason) {
-      toast.error(errorMessage(reason));
+      notify.error("Could not save rate", errorMessage(reason));
     }
   }
 

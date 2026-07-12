@@ -9,6 +9,7 @@ import { SiteFooter } from "@/components/site-footer";
 import { DestinationCard } from "@/components/destination-card";
 import { RegionCard } from "@/components/region-card";
 import { RouteRibbon } from "@/components/route-ribbon";
+import { ServicesTrailArt } from "@/components/services-trail-art";
 import { Reveal } from "@/components/reveal";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -35,7 +36,7 @@ export default async function Home() {
         <div className="container-shell relative z-10 flex min-h-[720px] items-center pt-28">
           <div className="max-w-3xl pb-20">
             <HeroTypewriter />
-            <p className="mt-8 max-w-xl text-base leading-8 text-white/80 md:text-lg">Explore mountain places and plan with local operators—clear details for the road ahead.</p>
+            <p className="mt-8 max-w-xl text-base leading-8 text-white/80 md:text-lg">Explore mountain places and plan with local operators clear details for the road ahead.</p>
             <HomeHeroCta />
           </div>
         </div>
@@ -44,10 +45,13 @@ export default async function Home() {
       <main>
         <section className="section-pad">
           <div className="container-shell">
-            <Reveal className="max-w-2xl">
-              <p className="eyebrow text-[#5a7f73]">What you can do</p>
-              <h2 className="display-title mt-3 text-5xl leading-none md:text-7xl">Services for the road ahead.</h2>
-              <p className="mt-5 text-base leading-8 text-muted-foreground">Discover places, compare packages, shape a trip, and book with operators you can trust.</p>
+            <Reveal className="grid items-center gap-8 lg:grid-cols-[1fr_minmax(14rem,20rem)]">
+              <div className="max-w-2xl">
+                <p className="eyebrow text-[#5a7f73]">What you can do</p>
+                <h2 className="display-title mt-3 text-5xl leading-none md:text-7xl">Services for the road ahead.</h2>
+                <p className="mt-5 text-base leading-8 text-muted-foreground">Discover places, compare packages, shape a trip, and book with operators you can trust.</p>
+              </div>
+              <ServicesTrailArt className="mx-auto w-full max-w-xs justify-self-end lg:max-w-none" />
             </Reveal>
             <div className="mt-12 grid gap-5 md:grid-cols-2 lg:grid-cols-4">
               {[

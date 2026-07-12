@@ -4,7 +4,7 @@ import { auth } from "@/auth";
 const AUTH_REQUIRED = ["/checkout", "/bookings", "/profile"];
 const VENDOR_PATHS = ["/dashboard", "/fleet", "/hotels", "/camps", "/guide-profile", "/vendor"];
 const ADMIN_PATHS = ["/approvals", "/analytics"];
-const AUTH_PAGES = ["/sign-in", "/sign-up"];
+const AUTH_PAGES = ["/sign-in", "/sign-up", "/forgot-password", "/reset-password", "/verify-email"];
 
 function matches(pathname: string, prefixes: string[]) {
   return prefixes.some((prefix) => pathname === prefix || pathname.startsWith(prefix + "/"));

@@ -68,7 +68,8 @@ export function getPublicNav(actor: ActorContext | null): NavLink[] {
 }
 
 export function getExploreCtaHref(actor: ActorContext | null): string | null {
-  if (!actor || actor.role === Role.CUSTOMER) return "/packages";
+  if (!actor) return null;
+  if (actor.role === Role.CUSTOMER) return "/packages";
   return null;
 }
 

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { signOut, useSession } from "next-auth/react";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import { LogOut, UserRound } from "lucide-react";
+import { useState } from "react";
 import { getAccountMenuLinks, type NavLink } from "@/lib/navigation";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -17,6 +18,35 @@ function initials(name?: string | null, email?: string | null) {
     return parts.map((part) => part[0]?.toUpperCase() ?? "").join("") || source[0]?.toUpperCase() || "?";
   }
   return email?.[0]?.toUpperCase() ?? "?";
+}
+
+function AvatarFace({
+  image,
+  name,
+  email,
+}: {
+  image?: string | null;
+  name?: string | null;
+  email?: string | null;
+}) {
+  const [failed, setFailed] = useState(false);
+  const showImage = Boolean(image) && !failed;
+
+  if (showImage) {
+    return (
+      // Google avatars reject hotlinks that send a Referer; no-referrer fixes the broken DP.
+      // eslint-disable-next-line @next/next/no-img-element
+      <img
+        src={image!}
+        alt=""
+        referrerPolicy="no-referrer"
+        className="size-full object-cover"
+        onError={() => setFailed(true)}
+      />
+    );
+  }
+
+  return <span className="text-sm">{initials(name, email)}</span>;
 }
 
 export function UserAccountMenu({
@@ -88,12 +118,7 @@ export function UserAccountMenu({
               : "border-primary/15 bg-accent text-primary hover:brightness-95",
           )}
         >
-          {user.image ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={user.image} alt="" className="size-full object-cover" />
-          ) : (
-            <span className="text-sm">{initials(user.name, user.email)}</span>
-          )}
+          <AvatarFace image={user.image} name={user.name} email={user.email} />
         </button>
       </DropdownMenu.Trigger>
       <DropdownMenu.Portal>
@@ -102,9 +127,14 @@ export function UserAccountMenu({
           sideOffset={10}
           className="z-[200] w-60 rounded-2xl border border-primary/10 bg-[#fffdf8] p-2 text-primary shadow-2xl"
         >
-          <div className="px-3 py-2">
-            <p className="truncate text-sm font-extrabold">{user.name || "Account"}</p>
-            {user.email && <p className="truncate text-xs text-muted-foreground">{user.email}</p>}
+          <div className="flex items-center gap-3 px-3 py-2">
+            <span className="grid size-10 shrink-0 place-items-center overflow-hidden rounded-full border border-primary/10 bg-accent text-primary">
+              <AvatarFace image={user.image} name={user.name} email={user.email} />
+            </span>
+            <div className="min-w-0">
+              <p className="truncate text-sm font-extrabold">{user.name || "Account"}</p>
+              {user.email && <p className="truncate text-xs text-muted-foreground">{user.email}</p>}
+            </div>
           </div>
           <div className="my-1 h-px bg-primary/10" />
           {links.map((link) => (

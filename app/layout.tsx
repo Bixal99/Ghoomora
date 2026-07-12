@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
 import { Toaster } from "sonner";
+import { AppToasts } from "@/components/app-toasts";
 import { AuthSessionProvider } from "@/components/providers/session-provider";
 import "./globals.css";
 
@@ -26,7 +27,20 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       <body>
         <AuthSessionProvider>
           {children}
-          <Toaster richColors position="top-right" />
+          <AppToasts />
+          <Toaster
+            richColors
+            closeButton
+            position="top-center"
+            duration={4500}
+            toastOptions={{
+              classNames: {
+                toast: "font-[family-name:var(--font-poppins)] border border-primary/10 shadow-lg",
+                title: "font-bold",
+                description: "text-sm opacity-90",
+              },
+            }}
+          />
         </AuthSessionProvider>
       </body>
     </html>

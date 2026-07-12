@@ -18,6 +18,30 @@ export const signInSchema = z.object({
   rememberMe: z.coerce.boolean().default(false),
 });
 
+export const forgotPasswordSchema = z.object({
+  email: z.string().trim().toLowerCase().email("Enter a valid email address."),
+});
+
+export const resetPasswordSchema = z
+  .object({
+    token: z.string().min(1, "Reset link is missing or invalid."),
+    password: z.string().min(8, "Password must be at least 8 characters."),
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords do not match.",
+    path: ["confirmPassword"],
+  });
+
+export const verifyEmailOtpSchema = z.object({
+  email: z.string().trim().toLowerCase().email("Enter a valid email address."),
+  code: z.string().trim().regex(/^\d{6}$/, "Enter the 6-digit code from your email."),
+});
+
+export const resendEmailOtpSchema = z.object({
+  email: z.string().trim().toLowerCase().email("Enter a valid email address."),
+});
+
 export const vendorApplicationSchema = z.object({
   businessName: z.string().trim().min(3, "Business name is too short.").max(100),
   phone: z.string().trim().min(7, "Enter a valid phone number.").max(30),

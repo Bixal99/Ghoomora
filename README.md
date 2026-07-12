@@ -156,6 +156,8 @@ Open `.env` and fill in your credentials. Use `.env.example` as the reference te
 
 | Variable | Purpose |
 | --- | --- |
+| `RESEND_API_KEY`, `EMAIL_FROM` | Sign-up OTP + password reset via Resend. Test sender `onboarding@resend.dev` only mails your Resend account email; other addresses log the OTP/link to the server console. For production, verify a domain and set `EMAIL_FROM` to that domain. |
+| `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET` | Google OAuth (“Continue with Google”) — redirect URI `http://localhost:3000/api/auth/callback/google` |
 | `ORS_API_KEY` | Package route visualization (OpenRouteService) |
 | `GROQ_API_KEY` | AI trip planner — falls back to demo suggestions without it |
 | `NEXT_PUBLIC_PUSHER_KEY`, `PUSHER_*` | Live trip tracking |
@@ -176,11 +178,15 @@ This applies the schema and creates the single admin account from `ADMIN_EMAIL` 
 
 ### 4. Authentication
 
-Authentication is fully self-hosted with [Auth.js v5](https://authjs.dev/) using an email/password (Credentials) provider and database-backed sessions stored in Postgres via the Prisma adapter. No third-party auth service or webhook is required.
+Authentication is fully self-hosted with [Auth.js v5](https://authjs.dev/) using an email/password (Credentials) provider, optional Google OAuth, and database-backed sessions stored in Postgres via the Prisma adapter.
 
 - Generate `AUTH_SECRET` once with `npx auth secret` and paste it into `.env`.
-- New users sign up at `/sign-up` and are always created with the `CUSTOMER` role.
+- Email/password sign-up at `/sign-up` creates a `CUSTOMER` account, then requires a **6-digit email OTP** at `/verify-email` before sign-in works (`emailVerified` must be set).
+- With Resend’s test sender (`onboarding@resend.dev`), OTP email only reaches the Resend account owner address; any other signup email prints the code in the `npm run dev` terminal (`[email-otp]`). For real delivery to any user, verify a domain and update `EMAIL_FROM`.
+- Optional Google sign-in: set `AUTH_GOOGLE_ID` / `AUTH_GOOGLE_SECRET`. New Google users are created automatically and marked verified (no OTP).
 - Sign in at `/sign-in`; database sessions let an admin revoke access or refresh a role instantly.
+- Forgot password at `/forgot-password` emails a one-hour reset link to `/reset-password?token=…` for **verified** email/password accounts only (same Resend rules as OTP).
+- The header **Explore trips** CTA is shown only when a customer is signed in.
 
 ### 5. Run locally
 
@@ -207,7 +213,9 @@ Without a configured database, public catalog pages show setup guidance. When th
 | `/packages/[id]` | Live pricing configurator + route map |
 | `/trip-builder` | Match packages + AI-assisted planning |
 | `/checkout` | Complete a booking |
-| `/sign-in` · `/sign-up` | Auth.js email/password authentication |
+| `/sign-in` · `/sign-up` | Auth.js email/password (+ Google when configured) |
+| `/verify-email` | 6-digit OTP after email/password sign-up |
+| `/forgot-password` · `/reset-password` | Request and complete a password reset |
 
 ### Partner
 
@@ -289,7 +297,10 @@ app/
   fleet/ hotels/ camps/     # Partner inventory
   vendor/packages/          # Partner package editor
   analytics/ approvals/     # Admin dashboards
-  sign-in/ sign-up/         # Auth.js email/password pages
+  sign-in/ sign-up/         # Auth.js email/password (+ Google) pages
+  verify-email/             # OTP verification after sign-up
+  forgot-password/          # Request password reset email
+  reset-password/           # Set a new password from email link
   api/
     auth/[...nextauth]/     # Auth.js route handlers
     ai-planner/             # AI itinerary + cost estimation

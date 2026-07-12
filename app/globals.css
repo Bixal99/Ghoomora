@@ -108,6 +108,15 @@
   mask-image: radial-gradient(circle at 30% 40%, black 20%, transparent 75%);
 }
 
+@keyframes hero-caret-blink {
+  0%, 45% { opacity: 1; }
+  46%, 100% { opacity: 0; }
+}
+
+.hero-caret {
+  animation: hero-caret-blink 0.7s steps(1, end) infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }

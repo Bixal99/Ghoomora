@@ -9,7 +9,7 @@ import { UserAccountMenu } from "@/components/user-account-menu";
 
 export function SiteHeader({
   navLinks,
-  exploreHref = "/packages",
+  exploreHref = null,
   accountMenuLinks,
   homeHref = "/",
 }: {

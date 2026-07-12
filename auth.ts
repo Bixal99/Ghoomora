@@ -1,5 +1,6 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
+import Google from "next-auth/providers/google";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { encode as defaultEncode } from "next-auth/jwt";
 import type { Adapter } from "next-auth/adapters";
@@ -14,6 +15,9 @@ const adapter = db ? (PrismaAdapter(db) as Adapter) : undefined;
 
 // Cookie Max-Age uses the remember-me ceiling; actual short-session validity is Session.expires in the DB.
 const rememberMeMaxAge = getRememberMeMaxAgeSeconds();
+
+const googleId = process.env.AUTH_GOOGLE_ID?.trim();
+const googleSecret = process.env.AUTH_GOOGLE_SECRET?.trim();
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   ...authConfig,
@@ -37,6 +41,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         if (!client) return null;
         const user = await client.user.findUnique({ where: { email } });
         if (!user?.passwordHash) return null;
+        if (!user.emailVerified) return null;
         const valid = await verifyPassword(password, user.passwordHash);
         if (!valid) return null;
         return {
@@ -47,12 +52,38 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         };
       },
     }),
+    ...(googleId && googleSecret
+      ? [
+          Google({
+            clientId: googleId,
+            clientSecret: googleSecret,
+            allowDangerousEmailAccountLinking: true,
+          }),
+        ]
+      : []),
   ],
+  events: {
+    async createUser({ user }) {
+      const client = getDb();
+      if (!client || !user.id) return;
+      // Adapter createUser runs for OAuth (e.g. Google). Credentials sign-up creates users via Prisma directly.
+      await client.user.update({
+        where: { id: user.id },
+        data: {
+          role: Role.CUSTOMER,
+          emailVerified: new Date(),
+        },
+      });
+    },
+  },
   callbacks: {
     session({ session, user }) {
       if (session.user && user) {
         session.user.id = user.id;
         session.user.role = (user as { role?: Role }).role ?? Role.CUSTOMER;
+        session.user.name = user.name ?? session.user.name;
+        session.user.email = user.email ?? session.user.email;
+        session.user.image = user.image ?? session.user.image;
         // Never leak the password hash to the client via the session response.
         delete (session.user as unknown as Record<string, unknown>).passwordHash;
       }

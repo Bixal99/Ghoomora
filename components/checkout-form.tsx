@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { toast } from "sonner";
+import { notify } from "@/lib/notify";
 import { createBooking } from "@/app/actions/booking";
 import type { PackageView } from "@/lib/data";
 import type { PriceEstimate } from "@/lib/pricing-core";
@@ -46,7 +46,7 @@ export function CheckoutForm({
     } catch (reason) {
       const message = reason instanceof Error ? reason.message : "Checkout failed.";
       setError(message);
-      toast.error(message);
+      notify.error("Checkout failed", message);
       setSubmitting(false);
     }
   }

@@ -1,6 +1,6 @@
 "use client";
 
-import { toast } from "sonner";
+import { notify } from "@/lib/notify";
 import { createPackage } from "@/app/actions/vendor";
 import { Button } from "@/components/ui/button";
 
@@ -12,9 +12,9 @@ export function CreatePackageForm({
   async function action(formData: FormData) {
     try {
       await createPackage(formData);
-      toast.success("Package created");
+      notify.success("Package created", "Your trip listing was saved.");
     } catch (reason) {
-      toast.error(reason instanceof Error ? reason.message : "Could not create package.");
+      notify.error("Could not create package", reason instanceof Error ? reason.message : "Please try again.");
     }
   }
 

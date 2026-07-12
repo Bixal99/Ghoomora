@@ -8,7 +8,7 @@ import { UserAccountMenu } from "@/components/user-account-menu";
 
 export function InnerHeader({
   navLinks,
-  exploreHref = "/packages",
+  exploreHref = null,
   accountMenuLinks,
   homeHref = "/",
 }: {

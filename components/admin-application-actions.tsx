@@ -1,6 +1,6 @@
 "use client";
 
-import { toast } from "sonner";
+import { notify } from "@/lib/notify";
 import { approveVendorApplication, rejectVendorApplication } from "@/app/actions/admin";
 import { Button } from "@/components/ui/button";
 
@@ -12,9 +12,9 @@ export function ApproveApplicationButton({ applicationId }: { applicationId: str
   async function action(formData: FormData) {
     try {
       await approveVendorApplication(formData);
-      toast.success("Application approved");
+      notify.success("Application approved");
     } catch (reason) {
-      toast.error(errorMessage(reason));
+      notify.error("Could not approve", errorMessage(reason));
     }
   }
 
@@ -30,9 +30,9 @@ export function RejectApplicationForm({ applicationId }: { applicationId: string
   async function action(formData: FormData) {
     try {
       await rejectVendorApplication(formData);
-      toast.success("Application rejected");
+      notify.success("Application rejected");
     } catch (reason) {
-      toast.error(errorMessage(reason));
+      notify.error("Could not reject", errorMessage(reason));
     }
   }
 
