@@ -2,7 +2,6 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { ArrowRight, BedDouble, BusFront, Compass, Map, ShieldCheck, TentTree, UsersRound } from "lucide-react";
 import { HeroScene } from "@/components/hero-scene";
-import { GradientText } from "@/components/reactbits/gradient-text";
 import { HomeHeroCta } from "@/components/home-hero-cta";
 import { SiteHeaderShell } from "@/components/site-header-shell";
 import { SiteFooter } from "@/components/site-footer";
@@ -26,7 +25,6 @@ export default async function Home() {
   const catalog = await loadRegions();
   const regions = catalog.status === "ready" ? catalog.data : [];
   const featured = regions.flatMap((region) => region.destinations).filter((item) => ["hunza-valley", "deosai-sheosar-lake", "saif-ul-malook-lake"].includes(item.slug));
-  const destinationCount = regions.flatMap((item) => item.destinations).length;
   return (
     <>
       <WelcomeToast />
@@ -35,14 +33,11 @@ export default async function Home() {
         <HeroScene />
         <div className="container-shell relative z-10 flex min-h-[720px] items-center pt-28">
           <div className="max-w-3xl pb-20">
-            <p className="eyebrow mb-6 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/8 px-4 py-2 text-accent backdrop-blur"><span className="size-1.5 rounded-full bg-accent" />Northern Pakistan · one thoughtful journey</p>
-            <h1 className="display-title text-[clamp(3.35rem,9.2vw,7.75rem)] leading-[.82]">Go beyond<br /><GradientText className="italic">the postcard.</GradientText></h1>
-            <p className="mt-8 max-w-xl text-base leading-8 text-white/78 md:text-lg">Discover mountain regions, compare transparent trip tiers and plan with local operators—without losing the practical details that matter on the road.</p>
+            <h1 className="display-title text-[clamp(3.35rem,9.2vw,7.75rem)] leading-[.82] text-white">Go beyond the postcard.</h1>
+            <p className="mt-8 max-w-xl text-base leading-8 text-white/80 md:text-lg">Explore mountain places and plan with local operators—clear details for the road ahead.</p>
             <HomeHeroCta />
-            <div className="mt-10 flex flex-wrap gap-7 text-sm text-white/65"><span><strong className="text-white">{regions.length}</strong> mountain regions</span><span><strong className="text-white">{destinationCount}</strong> verified coordinates</span><span><strong className="text-white">2-layer</strong> transport pricing</span></div>
           </div>
         </div>
-        <div className="absolute bottom-6 right-6 z-20 hidden rounded-2xl border border-white/15 bg-[#0b2821]/45 p-5 shadow-2xl backdrop-blur-xl lg:block"><p className="eyebrow text-accent">Built for real roads</p><p className="mt-2 max-w-[220px] text-sm text-white/70">Pickup travel and local 4x4 hire stay separate, so estimates remain clear.</p></div>
       </section>
 
       <main>
