@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
+import { Toaster } from "sonner";
 import { AuthSessionProvider } from "@/components/providers/session-provider";
 import "./globals.css";
 
@@ -22,7 +23,12 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" className={poppins.variable}>
-      <body><AuthSessionProvider>{children}</AuthSessionProvider></body>
+      <body>
+        <AuthSessionProvider>
+          {children}
+          <Toaster richColors position="top-right" />
+        </AuthSessionProvider>
+      </body>
     </html>
   );
 }

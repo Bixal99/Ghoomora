@@ -4,6 +4,7 @@ import { ApplicationStatus, Role } from "@prisma/client";
 import { approveVendorApplication, rejectVendorApplication } from "@/app/actions/admin";
 import { AccessPanel } from "@/components/access-panel";
 import { PortalShell } from "@/components/portal-shell";
+import { WelcomeToast } from "@/components/welcome-toast";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -36,6 +37,7 @@ export default async function ApprovalsPage({ searchParams }: { searchParams: Pr
 
   return (
     <PortalShell admin>
+      <WelcomeToast />
       <p className="eyebrow text-[#5a7f73]">Admin control</p>
       <h1 className="display-title mt-2 text-6xl">Vendor applications</h1>
       <p className="mt-4 text-muted-foreground">Review pending applications first. Approved and rejected history is available in the tabs below.</p>

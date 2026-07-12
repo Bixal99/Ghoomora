@@ -8,6 +8,7 @@ import { registerUser } from "@/app/actions/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/auth/password-input";
+import { setWelcomeFlag } from "@/components/welcome-toast";
 import { resolvePostLoginRedirect } from "@/lib/navigation";
 import { signUpSchema } from "@/lib/validation";
 
@@ -63,6 +64,7 @@ export function SignUpForm({ redirectTo, signInHref }: { redirectTo: string; sig
     }
 
     const session = await getSession();
+    setWelcomeFlag(session?.user?.name ?? name);
     const destination = resolvePostLoginRedirect(redirectTo, session?.user?.role);
     router.push(destination);
     router.refresh();

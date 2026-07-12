@@ -5,6 +5,7 @@ import { GradientText } from "@/components/reactbits/gradient-text";
 import { HomeHeroCta } from "@/components/home-hero-cta";
 import { SiteHeaderShell } from "@/components/site-header-shell";
 import { SiteFooter } from "@/components/site-footer";
+import { WelcomeToast } from "@/components/welcome-toast";
 import { DestinationCard } from "@/components/destination-card";
 import { Reveal } from "@/components/reveal";
 import { Button } from "@/components/ui/button";
@@ -22,6 +23,7 @@ export default async function Home() {
   const featured = regions.flatMap((region) => region.destinations).filter((item) => ["hunza-valley", "deosai-sheosar-lake", "saif-ul-malook-lake"].includes(item.slug));
   return (
     <>
+      <WelcomeToast />
       <section className="relative min-h-[720px] overflow-hidden bg-[radial-gradient(circle_at_72%_20%,#5b9c8b_0,#245246_29%,#0b2821_72%)] text-white">
         <SiteHeaderShell />
         <HeroScene />

@@ -4,6 +4,7 @@ import { ArrowRight, CheckCircle2, Clock3, Package, Settings2 } from "lucide-rea
 import { updateBookingStatus } from "@/app/actions/booking";
 import { AccessPanel } from "@/components/access-panel";
 import { PortalShell } from "@/components/portal-shell";
+import { WelcomeToast } from "@/components/welcome-toast";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -50,6 +51,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
   const notice = (await searchParams).notice;
   return (
     <PortalShell vendorTypes={vendorTypes}>
+      <WelcomeToast />
       <div className="flex flex-wrap items-end justify-between gap-4"><div><p className="eyebrow text-[#5a7f73]">Partner overview</p><h1 className="display-title mt-2 text-6xl">{actor.vendor.businessName}</h1></div><Badge className={actor.vendor.verified ? "border-[#397668] bg-[#dff1e9] text-[#23594c]" : "border-[#d19b48] bg-[#fff2d8] text-[#805b21]"}>{actor.vendor.verified ? <CheckCircle2 size={13} /> : <Clock3 size={13} />}{actor.vendor.verified ? "Verified" : "Awaiting approval"}</Badge></div>
       {notice && <div className="mt-6 rounded-xl bg-[#dff1e9] p-4 text-sm font-bold text-[#23594c]">{notice}</div>}
       <div className="mt-8 grid gap-5 md:grid-cols-3">{statCards.map((item) => <Card key={item.label} className="p-6"><item.icon className="text-[#397668]" /><p className="mt-8 text-4xl font-extrabold">{item.value}</p><p className="text-sm text-muted-foreground">{item.label}</p><Link href={item.href} className="mt-5 inline-flex items-center gap-1 text-sm font-bold text-[#397668]">Manage <ArrowRight size={15} /></Link></Card>)}</div>
