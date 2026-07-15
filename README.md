@@ -1,30 +1,24 @@
 <div align="center">
 
-# ⛰ Ghoomora
-
-### *Go beyond the postcard.*
-
-**Northern Pakistan, thoughtfully planned.**
-
-Discover mountain regions · Compare verified trip packages · Plan with local operators  
-Built for the roads, seasons, and transport realities of **Gilgit-Baltistan**, **Kashmir**, and **Khyber Pakhtunkhwa**.
+<img src="docs/assets/ghoomora-banner.png" alt="Ghoomora — Northern Pakistan Travel Platform" width="100%" />
 
 <br />
 
-<img src="docs/assets/ghoomora-hero.png" alt="Ghoomora — GO BEYOND the Postcard" width="920" />
+### Travel planning for real northern roads
+
+**Regions · Packages · Trip builder · Maps · Weather · Safety · Bookings · Role-based ops**  
+— one Next.js app, built on a modern free & open-source stack.
 
 <br />
 
-<!-- Status & stack badges -->
-
-[![Next.js](https://img.shields.io/badge/Next.js-16-black?style=for-the-badge&logo=nextdotjs&logoColor=white)](https://nextjs.org/)
-[![React](https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-6-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind-4-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
-[![Prisma](https://img.shields.io/badge/Prisma-7-2D3748?style=for-the-badge&logo=prisma&logoColor=white)](https://www.prisma.io/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Next.js](https://img.shields.io/badge/Next.js_16-000000?style=for-the-badge&logo=nextdotjs&logoColor=white)](https://nextjs.org/)
+[![React](https://img.shields.io/badge/React_19-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev/)
+[![Node.js](https://img.shields.io/badge/Node.js_≥20-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)](https://nodejs.org/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
-[![Auth.js](https://img.shields.io/badge/Auth.js-v5-000000?style=for-the-badge&logo=auth0&logoColor=white)](https://authjs.dev/)
-[![License](https://img.shields.io/badge/License-Private-red?style=for-the-badge)](#license)
+[![Prisma](https://img.shields.io/badge/Prisma_7-2D3748?style=for-the-badge&logo=prisma&logoColor=white)](https://www.prisma.io/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_4-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
+[![Auth.js](https://img.shields.io/badge/Auth.js_v5-000000?style=for-the-badge&logo=auth0&logoColor=white)](https://authjs.dev/)
 
 <br />
 
@@ -34,6 +28,14 @@ Built for the roads, seasons, and transport realities of **Gilgit-Baltistan**, *
 [![Routes](https://img.shields.io/badge/🗺_Routes-Map-52B788?style=flat-square)](#-key-routes)
 [![Partners](https://img.shields.io/badge/🤝_Partners-Portal-74C69D?style=flat-square)](#-for-partners)
 [![Admin](https://img.shields.io/badge/🛡_Admin-Console-95D5B2?style=flat-square)](#-for-admins)
+
+<br />
+
+<img src="docs/assets/ghoomora-hero.png" alt="Ghoomora — GO BEYOND the Postcard" width="920" />
+
+<br />
+
+*Go beyond the postcard.* Northern Pakistan — **Gilgit-Baltistan**, **Kashmir**, and **Khyber Pakhtunkhwa** — thoughtfully planned with verified local operators.
 
 </div>
 
@@ -646,7 +648,7 @@ Unauthorized copying, distribution, or commercial use is prohibited without expl
 
 <div align="center">
 
-<img src="docs/assets/ghoomora-hero.png" alt="Ghoomora hero" width="640" />
+<img src="docs/assets/ghoomora-banner.png" alt="Ghoomora" width="720" />
 
 <br /><br />
 
@@ -658,9 +660,10 @@ Unauthorized copying, distribution, or commercial use is prohibited without expl
 
 <br />
 
-[![Next.js](https://img.shields.io/badge/Made_with-Next.js_16-black?style=flat-square&logo=nextdotjs)](https://nextjs.org/)
-[![TypeScript](https://img.shields.io/badge/Typed-TypeScript-3178C6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![Prisma](https://img.shields.io/badge/ORM-Prisma_7-2D3748?style=flat-square&logo=prisma&logoColor=white)](https://www.prisma.io/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Next.js](https://img.shields.io/badge/Next.js_16-000000?style=flat-square&logo=nextdotjs)](https://nextjs.org/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?style=flat-square&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
+[![Prisma](https://img.shields.io/badge/Prisma_7-2D3748?style=flat-square&logo=prisma&logoColor=white)](https://www.prisma.io/)
 
 <br />
 
